@@ -1,0 +1,17 @@
+{
+  "name": "planning-poker-cats",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev:server": "node --watch server.js",
+    "build": "cd client && npm install && npm run build"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
