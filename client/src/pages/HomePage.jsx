@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateRoomCode } from '../pubsub';
 import { AVATARS, CatAvatar } from '../cats/CatAvatars';
@@ -10,6 +10,13 @@ export default function HomePage() {
   const [tab, setTab] = useState('create');
   const [error, setError] = useState('');
   const [avatarId, setAvatarId] = useState(() => parseInt(localStorage.getItem('pp_avatar') || '0'));
+
+  // Auto-redirect if ?room=CODE or ?code=CODE is in the URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = (params.get('room') || params.get('code') || '').trim().toUpperCase();
+    if (code.length >= 4) navigate(`/room/${code}`, { replace: true });
+  }, []);
 
   function saveAvatar(id) {
     setAvatarId(id);

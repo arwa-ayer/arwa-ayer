@@ -152,7 +152,8 @@ export default function RoomPage() {
     storyTimer.current = setTimeout(() => pub({ type: 'SET_STORY', story: v }), 500);
   }
   function copyCode() {
-    navigator.clipboard.writeText(roomId).catch(() => {});
+    const url = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+    navigator.clipboard.writeText(url).catch(() => {});
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
   function submitName() {
@@ -229,9 +230,9 @@ export default function RoomPage() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-gray-400 hidden sm:block">Salon :</span>
             <button onClick={copyCode}
-              className="font-mono text-sm font-bold px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50
+              className="text-sm font-bold px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50
                          hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 transition-all">
-              {copied ? '✓ Copié' : roomId}
+              {copied ? '✓ Lien copié !' : `🔗 ${roomId}`}
             </button>
           </div>
 
