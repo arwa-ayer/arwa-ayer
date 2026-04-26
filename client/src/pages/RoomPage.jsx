@@ -6,7 +6,6 @@ import PlayerCard from '../components/PlayerCard';
 import FelixScreen from '../components/FelixScreen';
 
 const VOTE_VALUES = ['1', '2', '3', '5', '8', '13', '21', '?', '☕'];
-
 const MY_ID = getPlayerId();
 
 function getAdminId(playersMap) {
@@ -24,33 +23,24 @@ export default function RoomPage() {
   const [showNamePrompt, setShowNamePrompt] = useState(!localStorage.getItem('playerName'));
   const [nameInput, setNameInput] = useState('');
 
-  const [players, setPlayers]       = useState([]);
-  const [isAdmin, setIsAdmin]       = useState(false);
-  const [votes, setVotes]           = useState({});
-  const [hasVoted, setHasVoted]     = useState(new Set());
-  const [myVote, setMyVote]         = useState(null);
-  const [revealed, setRevealed]     = useState(false);
-  const [story, setStory]           = useState('');
+  const [players, setPlayers]     = useState([]);
+  const [isAdmin, setIsAdmin]     = useState(false);
+  const [votes, setVotes]         = useState({});
+  const [hasVoted, setHasVoted]   = useState(new Set());
+  const [myVote, setMyVote]       = useState(null);
+  const [revealed, setRevealed]   = useState(false);
+  const [story, setStory]         = useState('');
   const [storyInput, setStoryInput] = useState('');
-  const [showFelix, setShowFelix]   = useState(false);
+  const [showFelix, setShowFelix] = useState(false);
   const [consensusValue, setConsensusValue] = useState(null);
-  const [connected, setConnected]   = useState(false);
-  const [copied, setCopied]         = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [copied, setCopied]       = useState(false);
 
-  const sRef = useRef({              // shared mutable game state
-    players: {},
-    votes: {},
-    pending: {},                     // votes before reveal
-    hasVoted: new Set(),
-    revealed: false,
-    story: '',
-    adminId: null,
-  });
-  const pnRef        = useRef(null);
-  const storyTimer   = useRef(null);
-  const started      = useRef(false);
+  const sRef = useRef({ players: {}, votes: {}, pending: {}, hasVoted: new Set(), revealed: false, story: '', adminId: null });
+  const pnRef = useRef(null);
+  const storyTimer = useRef(null);
+  const started = useRef(false);
 
-  /* ── sync ref state → React state ── */
   const sync = useCallback(() => {
     const s = sRef.current;
     const arr = Object.values(s.players).sort((a, b) => a.ts - b.ts)
@@ -59,158 +49,76 @@ export default function RoomPage() {
     setIsAdmin(s.adminId === MY_ID);
     setRevealed(s.revealed);
     setStory(s.story);
-    if (s.revealed) {
-      setVotes({ ...s.votes });
-      setMyVote(s.votes[MY_ID] ?? null);
-    } else {
-      setHasVoted(new Set(s.hasVoted));
-    }
+    if (s.revealed) { setVotes({ ...s.votes }); setMyVote(s.votes[MY_ID] ?? null); }
+    else            { setHasVoted(new Set(s.hasVoted)); }
   }, []);
 
-  /* ── publish helper ── */
-  function pub(msg) {
-    pnRef.current?.publish({ channel, message: msg }).catch(() => {});
-  }
+  function pub(msg) { pnRef.current?.publish({ channel, message: msg }).catch(() => {}); }
 
-  /* ── serialise state for sync ── */
   function shareableState() {
     const s = sRef.current;
-    return {
-      players:  { ...s.players },
-      adminId:  s.adminId,
-      revealed: s.revealed,
-      story:    s.story,
-      votes:    s.revealed ? { ...s.votes } : {},
-      pending:  { ...s.pending },
-      hasVoted: Array.from(s.hasVoted),
-    };
+    return { players: { ...s.players }, adminId: s.adminId, revealed: s.revealed, story: s.story,
+             votes: s.revealed ? { ...s.votes } : {}, pending: { ...s.pending }, hasVoted: Array.from(s.hasVoted) };
   }
 
-  /* ── message handler ── */
   const onMsg = useCallback((msg) => {
     const s = sRef.current;
-
     switch (msg.type) {
-
       case 'JOIN': {
         if (!s.players[msg.id]) {
           s.players[msg.id] = { id: msg.id, name: msg.name, ts: msg.ts };
           s.adminId = getAdminId(s.players);
-          if (s.adminId === MY_ID && msg.id !== MY_ID) {
+          if (s.adminId === MY_ID && msg.id !== MY_ID)
             setTimeout(() => pub({ type: 'STATE_SYNC', targetId: msg.id, state: shareableState() }), 300);
-          }
         }
-        sync();
-        break;
+        sync(); break;
       }
-
       case 'LEAVE': {
-        delete s.players[msg.id];
-        s.hasVoted.delete(msg.id);
-        delete s.pending[msg.id];
+        delete s.players[msg.id]; s.hasVoted.delete(msg.id); delete s.pending[msg.id];
         if (s.revealed) delete s.votes[msg.id];
-        s.adminId = getAdminId(s.players);
-        sync();
-        break;
+        s.adminId = getAdminId(s.players); sync(); break;
       }
-
-      case 'VOTE': {
-        s.hasVoted.add(msg.id);
-        s.pending[msg.id] = msg.value;
-        sync();
-        break;
-      }
-
-      case 'UNVOTE': {
-        s.hasVoted.delete(msg.id);
-        delete s.pending[msg.id];
-        sync();
-        break;
-      }
-
+      case 'VOTE':   { s.hasVoted.add(msg.id); s.pending[msg.id] = msg.value; sync(); break; }
+      case 'UNVOTE': { s.hasVoted.delete(msg.id); delete s.pending[msg.id]; sync(); break; }
       case 'REVEAL': {
-        s.revealed = true;
-        s.votes = { ...s.pending };
+        s.revealed = true; s.votes = { ...s.pending };
         const vals = Object.values(s.votes);
         const consensus = vals.length > 0 && vals.every(v => v === vals[0]);
         sync();
-        if (consensus) {
-          setConsensusValue(vals[0]);
-          setTimeout(() => setShowFelix(true), 400);
-        }
+        if (consensus) { setConsensusValue(vals[0]); setTimeout(() => setShowFelix(true), 400); }
         break;
       }
-
       case 'RESET': {
-        s.revealed = false;
-        s.votes = {};
-        s.pending = {};
-        s.hasVoted = new Set();
-        s.story = msg.story ?? '';
-        sync();
-        setMyVote(null);
-        setConsensusValue(null);
-        setShowFelix(false);
-        break;
+        s.revealed = false; s.votes = {}; s.pending = {}; s.hasVoted = new Set(); s.story = msg.story ?? '';
+        sync(); setMyVote(null); setConsensusValue(null); setShowFelix(false); break;
       }
-
-      case 'SET_STORY': {
-        s.story = msg.story;
-        setStory(msg.story);
-        setStoryInput(msg.story);
-        break;
-      }
-
-      case 'STATE_REQUEST': {
-        if (s.adminId === MY_ID && msg.id !== MY_ID) {
-          setTimeout(() => pub({ type: 'STATE_SYNC', targetId: msg.id, state: shareableState() }), 200);
-        }
-        break;
-      }
-
+      case 'SET_STORY':    { s.story = msg.story; setStory(msg.story); setStoryInput(msg.story); break; }
+      case 'STATE_REQUEST':{ if (s.adminId === MY_ID && msg.id !== MY_ID) setTimeout(() => pub({ type: 'STATE_SYNC', targetId: msg.id, state: shareableState() }), 200); break; }
       case 'STATE_SYNC': {
         if (msg.targetId && msg.targetId !== MY_ID) break;
         const inc = msg.state;
-        for (const [id, p] of Object.entries(inc.players || {})) {
-          if (!s.players[id]) s.players[id] = p;
-        }
-        s.adminId  = inc.adminId || getAdminId(s.players);
-        s.revealed = inc.revealed;
-        s.story    = inc.story;
-        s.votes    = inc.votes || {};
-        s.pending  = inc.pending || {};
-        s.hasVoted = new Set(inc.hasVoted || []);
-        sync();
-        break;
+        for (const [id, p] of Object.entries(inc.players || {})) if (!s.players[id]) s.players[id] = p;
+        s.adminId = inc.adminId || getAdminId(s.players); s.revealed = inc.revealed; s.story = inc.story;
+        s.votes = inc.votes || {}; s.pending = inc.pending || {}; s.hasVoted = new Set(inc.hasVoted || []);
+        sync(); break;
       }
-
       default: break;
     }
   }, [sync]);
 
-  /* ── start PubNub ── */
   function start(name) {
     if (started.current) return;
     started.current = true;
-
     const pn = createPubNub(MY_ID);
     pnRef.current = pn;
-
     pn.addListener({
       message:  ({ message }) => onMsg(message),
-      presence: ({ action, uuid }) => {
-        if ((action === 'leave' || action === 'timeout') && uuid !== MY_ID) {
-          onMsg({ type: 'LEAVE', id: uuid });
-        }
-      },
+      presence: ({ action, uuid }) => { if ((action === 'leave' || action === 'timeout') && uuid !== MY_ID) onMsg({ type: 'LEAVE', id: uuid }); },
       status: ({ category }) => {
         if (category === 'PNConnectedCategory') {
           setConnected(true);
-          const ts = Date.now();
-          const s = sRef.current;
-          s.players[MY_ID] = { id: MY_ID, name, ts };
-          s.adminId = getAdminId(s.players);
-          sync();
+          const ts = Date.now(); const s = sRef.current;
+          s.players[MY_ID] = { id: MY_ID, name, ts }; s.adminId = getAdminId(s.players); sync();
           pub({ type: 'JOIN', id: MY_ID, name, ts });
           setTimeout(() => pub({ type: 'STATE_REQUEST', id: MY_ID }), 600);
         }
@@ -218,31 +126,24 @@ export default function RoomPage() {
         if (category === 'PNNetworkUpCategory') setConnected(true);
       },
     });
-
     pn.subscribe({ channels: [channel], withPresence: true });
   }
 
   useEffect(() => {
     if (!showNamePrompt) start(playerName);
     return () => {
-      if (pnRef.current) {
-        pub({ type: 'LEAVE', id: MY_ID });
-        pnRef.current.unsubscribeAll();
-        pnRef.current.destroy?.();
-        pnRef.current = null;
-      }
+      if (pnRef.current) { pub({ type: 'LEAVE', id: MY_ID }); pnRef.current.unsubscribeAll(); pnRef.current.destroy?.(); pnRef.current = null; }
     };
   }, [showNamePrompt]);
 
-  /* ── actions ── */
   function handleVote(value) {
     if (revealed) return;
     if (myVote === value) { setMyVote(null); pub({ type: 'UNVOTE', id: MY_ID }); }
     else                  { setMyVote(value); pub({ type: 'VOTE', id: MY_ID, value }); }
   }
-  function handleReveal()  { pub({ type: 'REVEAL' }); }
-  function handleReset()   { pub({ type: 'RESET', story: storyInput }); setShowFelix(false); }
-  function handleStory(v)  {
+  function handleReveal() { pub({ type: 'REVEAL' }); }
+  function handleReset()  { pub({ type: 'RESET', story: storyInput }); setShowFelix(false); }
+  function handleStory(v) {
     setStoryInput(v);
     clearTimeout(storyTimer.current);
     storyTimer.current = setTimeout(() => pub({ type: 'SET_STORY', story: v }), 500);
@@ -252,58 +153,66 @@ export default function RoomPage() {
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
   function submitName() {
-    const n = nameInput.trim();
-    if (!n) return;
-    localStorage.setItem('playerName', n);
-    setShowNamePrompt(false);
+    const n = nameInput.trim(); if (!n) return;
+    localStorage.setItem('playerName', n); setShowNamePrompt(false);
   }
 
-  /* ── stats ── */
   const numVals = Object.values(votes).filter(v => !isNaN(Number(v))).map(Number);
   const avg = numVals.length ? (numVals.reduce((a, b) => a + b, 0) / numVals.length).toFixed(1) : null;
 
-  /* ── name prompt ── */
+  /* ── Name prompt ── */
   if (showNamePrompt) return (
-    <div className="min-h-screen bg-dark halftone flex items-center justify-center p-4">
-      <div className="comic-card w-full max-w-sm p-8 text-center">
-        <h2 className="font-comic text-3xl text-neon-yellow mb-6">Ton prénom ?</h2>
-        <input className="comic-input text-center text-xl mb-4" placeholder="Ex: Alex"
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="card w-full max-w-sm p-8 text-center">
+        <div className="text-3xl mb-4">🃏</div>
+        <h2 className="text-xl font-bold text-gray-900 mb-1">Votre prénom</h2>
+        <p className="text-sm text-gray-500 mb-6">Pour rejoindre la session</p>
+        <input className="input text-center text-base mb-4" placeholder="Ex : Alex"
           value={nameInput} onChange={e => setNameInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && submitName()} autoFocus />
-        <button onClick={submitName} className="btn-neon-pink w-full">Entrer</button>
+        <button onClick={submitName} className="btn btn-primary btn-lg w-full">Rejoindre</button>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-dark halftone flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-dark-border bg-dark-card/80 backdrop-blur-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4 flex-wrap">
-          <button onClick={() => navigate('/')} className="font-comic text-2xl text-neon-yellow tracking-wider">
-            PLANNING POKER
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
+          <button onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-gray-900 font-bold text-base hover:text-indigo-600 transition-colors">
+            <span>🃏</span> Planning Poker
           </button>
+
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-gray-400 text-sm hidden sm:block">Code:</span>
+            <span className="text-xs text-gray-400 hidden sm:block">Code salon :</span>
             <button onClick={copyCode}
-              className="font-comic text-lg tracking-[0.2em] px-4 py-1.5 rounded-lg border-2 border-dark-border hover:border-neon-blue text-neon-blue transition-all">
-              {copied ? '✓ Copié!' : roomId}
+              className="font-mono text-sm font-bold px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50
+                         hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 transition-all">
+              {copied ? '✓ Copié' : roomId}
             </button>
           </div>
-          <div className={`w-2.5 h-2.5 rounded-full ${connected ? 'bg-neon-green' : 'bg-red-500'} animate-pulse`} />
+
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${connected ? 'bg-emerald-500' : 'bg-red-400'}`} />
         </div>
       </header>
 
       {/* Story bar */}
-      <div className="border-b border-dark-border bg-dark/50 px-4 py-3">
+      <div className="bg-white border-b border-gray-100 px-4 py-2.5">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <span className="text-gray-400 text-sm whitespace-nowrap">📋 Story:</span>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Story</span>
           {isAdmin
-            ? <input className="flex-1 bg-transparent border-b-2 border-dark-border focus:border-neon-blue outline-none text-white px-1 py-0.5 transition-colors"
-                placeholder="Titre de la story..." value={storyInput}
-                onChange={e => handleStory(e.target.value)} maxLength={80} />
-            : <span className="flex-1 text-white">{story || <span className="text-gray-500 italic">En attente…</span>}</span>
+            ? <input
+                className="flex-1 text-sm text-gray-800 bg-transparent border-0 outline-none
+                           border-b border-transparent hover:border-gray-300 focus:border-indigo-400
+                           px-1 py-0.5 transition-colors placeholder-gray-300"
+                placeholder="Titre de la story en cours..."
+                value={storyInput} onChange={e => handleStory(e.target.value)} maxLength={80} />
+            : <span className="flex-1 text-sm text-gray-700">
+                {story || <span className="text-gray-400 italic">En attente d'une story…</span>}
+              </span>
           }
         </div>
       </div>
@@ -311,61 +220,72 @@ export default function RoomPage() {
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col lg:flex-row gap-6">
 
         {/* LEFT — voting */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-comic text-2xl text-white tracking-wider">
-              {revealed ? '🎉 Résultats' : myVote ? `✅ Voté: ${myVote}` : '🐾 Choisir une carte'}
-            </h2>
+            <div>
+              <h2 className="text-base font-bold text-gray-900">
+                {revealed ? 'Résultats' : 'Choisissez une carte'}
+              </h2>
+              {!revealed && myVote && (
+                <p className="text-xs text-indigo-600 font-medium mt-0.5">Vous avez voté : {myVote}</p>
+              )}
+            </div>
             {revealed && avg && (
-              <div className="bg-dark-card border-2 border-neon-yellow/50 rounded-xl px-4 py-2 font-comic text-neon-yellow text-xl">
-                Moy. {avg}
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-center shadow-sm">
+                <div className="text-xs text-gray-500 font-medium">Moyenne</div>
+                <div className="text-xl font-extrabold text-gray-900">{avg}</div>
               </div>
             )}
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
             {VOTE_VALUES.map(value => (
               <VoteCard key={value} value={value} selected={myVote === value}
                 disabled={revealed} onClick={() => handleVote(value)} />
             ))}
           </div>
 
+          {/* Progress */}
           {!revealed && (
-            <div className="mt-6 comic-card p-4">
-              <div className="flex justify-between mb-2 text-sm">
-                <span className="text-gray-400">{hasVoted.size} / {players.length} votes</span>
-                <span className="text-neon-green">
+            <div className="mt-5 card p-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-semibold text-gray-500">
+                  {hasVoted.size} / {players.length} votes
+                </span>
+                <span className="text-xs font-bold text-indigo-600">
                   {players.length > 0 ? Math.round((hasVoted.size / players.length) * 100) : 0}%
                 </span>
               </div>
-              <div className="w-full bg-dark-border rounded-full h-2">
-                <div className="h-2 rounded-full bg-gradient-to-r from-neon-pink to-neon-blue transition-all duration-500"
+              <div className="w-full bg-gray-100 rounded-full h-1.5">
+                <div className="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
                   style={{ width: `${players.length > 0 ? (hasVoted.size / players.length) * 100 : 0}%` }} />
               </div>
             </div>
           )}
 
+          {/* Admin actions */}
           {isAdmin && (
-            <div className="mt-4 flex gap-3 flex-wrap">
-              {!revealed
-                ? <button onClick={handleReveal} disabled={hasVoted.size === 0}
-                    className={`btn-neon-pink flex-1 ${hasVoted.size === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                    👁 Révéler ({hasVoted.size})
-                  </button>
-                : <button onClick={handleReset} className="btn-neon-green flex-1">
-                    🔄 Nouvelle manche
-                  </button>
-              }
+            <div className="mt-4 flex gap-3">
+              {!revealed ? (
+                <button onClick={handleReveal} disabled={hasVoted.size === 0}
+                  className="btn btn-primary btn-lg flex-1">
+                  Révéler les cartes {hasVoted.size > 0 && `(${hasVoted.size})`}
+                </button>
+              ) : (
+                <button onClick={handleReset} className="btn btn-success btn-lg flex-1">
+                  Nouvelle manche
+                </button>
+              )}
             </div>
           )}
         </div>
 
         {/* RIGHT — players */}
-        <div className="lg:w-80">
-          <h2 className="font-comic text-2xl text-white tracking-wider mb-4">
-            👥 Joueurs ({players.length})
+        <div className="lg:w-72 flex-shrink-0">
+          <h2 className="text-base font-bold text-gray-900 mb-3">
+            Participants <span className="text-gray-400 font-normal text-sm">({players.length})</span>
           </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
             {players.map(player => (
               <PlayerCard key={player.id} player={player}
                 isMe={player.id === MY_ID}
@@ -374,8 +294,10 @@ export default function RoomPage() {
                 revealed={revealed} />
             ))}
           </div>
-          {!isAdmin && !revealed && (
-            <p className="mt-6 text-center text-gray-500 text-sm">En attente que l'admin révèle les cartes…</p>
+          {!isAdmin && !revealed && players.length > 0 && (
+            <p className="mt-4 text-center text-xs text-gray-400">
+              En attente que l'animateur révèle les cartes…
+            </p>
           )}
         </div>
       </div>

@@ -15,82 +15,93 @@ export default function HomePage() {
   }
 
   function handleCreate() {
-    if (!name.trim()) { setError('Entre ton prénom !'); return; }
+    if (!name.trim()) { setError('Entre ton prénom pour continuer.'); return; }
     setError('');
-    localStorage.setItem('playerName', name.trim());
     navigate(`/room/${generateRoomCode()}`);
   }
 
   function handleJoin() {
-    if (!name.trim()) { setError('Entre ton prénom !'); return; }
-    if (roomCode.trim().length < 4) { setError('Entre le code du salon !'); return; }
+    if (!name.trim()) { setError('Entre ton prénom pour continuer.'); return; }
+    if (roomCode.trim().length < 4) { setError('Entre le code du salon.'); return; }
     setError('');
-    localStorage.setItem('playerName', name.trim());
     navigate(`/room/${roomCode.trim().toUpperCase()}`);
   }
 
   return (
-    <div className="min-h-screen bg-dark halftone overflow-hidden relative flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
 
-      <div className="text-center mb-10 relative z-10">
-        <h1 className="font-comic text-6xl md:text-8xl text-white"
-          style={{ textShadow: '4px 4px 0 #FF2D78, 8px 8px 0 rgba(0,212,255,0.3)' }}>
-          PLANNING
-        </h1>
-        <h1 className="font-comic text-6xl md:text-8xl text-neon-yellow"
-          style={{ textShadow: '4px 4px 0 #CC8800, 8px 8px 0 rgba(255,45,120,0.3)' }}>
-          POKER
-        </h1>
+      {/* Logo */}
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-3 mb-4">
+          <span className="text-4xl">🃏</span>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+            Planning <span className="text-indigo-600">Poker</span>
+          </h1>
+        </div>
+        <p className="text-gray-500 text-sm">Estimez vos stories en équipe, en temps réel</p>
       </div>
 
-      <div className="comic-card w-full max-w-md p-8 relative z-10"
-        style={{ boxShadow: '6px 6px 0 rgba(255,45,120,0.25), 0 0 40px rgba(255,45,120,0.1)' }}>
+      {/* Card */}
+      <div className="card w-full max-w-md p-8">
 
-        <div className="flex rounded-xl overflow-hidden border-2 border-dark-border mb-8">
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 mb-6">
           {['create', 'join'].map((t) => (
             <button key={t} onClick={() => { setTab(t); setError(''); }}
-              className={`flex-1 py-3 font-comic text-xl tracking-wider transition-all duration-200 ${
-                tab === t ? 'text-white' : 'bg-transparent text-gray-400 hover:text-white'
-              }`}
-              style={tab === t ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' } : {}}>
-              {t === 'create' ? '✦ Créer' : '↗ Rejoindre'}
+              className={`flex-1 pb-3 text-sm font-medium transition-colors ${
+                tab === t ? 'tab-active' : 'tab-inactive'
+              }`}>
+              {t === 'create' ? 'Créer un salon' : 'Rejoindre'}
             </button>
           ))}
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-400 uppercase tracking-widest mb-2 font-comic">Ton prénom</label>
-            <input className="comic-input" placeholder="Ex: Alex" value={name}
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              Prénom
+            </label>
+            <input
+              className="input"
+              placeholder="Ex : Alex"
+              value={name}
               onChange={(e) => saveName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (tab === 'create' ? handleCreate() : handleJoin())}
-              maxLength={24} />
+              maxLength={24}
+              autoFocus
+            />
           </div>
 
           {tab === 'join' && (
             <div>
-              <label className="block text-xs text-gray-400 uppercase tracking-widest mb-2 font-comic">Code du salon</label>
-              <input className="comic-input uppercase tracking-[0.3em] text-center text-xl font-comic"
-                placeholder="ABC123" value={roomCode}
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                Code du salon
+              </label>
+              <input
+                className="input uppercase tracking-widest text-center text-lg font-bold"
+                placeholder="ABC123"
+                value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === 'Enter' && handleJoin()} maxLength={6} />
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                maxLength={6}
+              />
             </div>
           )}
 
           {error && (
-            <div className="bg-red-900/30 border border-red-500/50 rounded-xl px-4 py-3 text-red-400 text-sm font-body">{error}</div>
+            <p className="text-sm text-red-500">{error}</p>
           )}
 
-          <button onClick={tab === 'create' ? handleCreate : handleJoin}
-            className={`w-full py-4 rounded-xl font-comic text-2xl tracking-widest transition-all duration-200 mt-2 ${
-              tab === 'create' ? 'btn-neon-pink' : 'btn-neon-blue'
-            }`}>
-            {tab === 'create' ? '✦ Créer le salon' : '↗ Rejoindre'}
+          <button
+            onClick={tab === 'create' ? handleCreate : handleJoin}
+            className="btn btn-primary btn-lg w-full mt-2"
+          >
+            {tab === 'create' ? 'Créer le salon' : 'Rejoindre'}
           </button>
         </div>
       </div>
 
-      <p className="mt-8 text-gray-600 text-sm font-body relative z-10">Scrum Poker · temps réel · Fibonacci</p>
+      <p className="mt-8 text-xs text-gray-400">Scrum Poker · Fibonacci · Temps réel</p>
     </div>
   );
 }
