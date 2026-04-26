@@ -55,23 +55,45 @@
            transition-shadow duration-150;
   }
 
-  /* Vote card */
+  /* Vote card — dark bottom-bar style */
   .vote-card {
-    @apply relative flex flex-col bg-white rounded-xl border-2 border-gray-200
-           cursor-pointer select-none overflow-hidden transition-all duration-150;
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    width: 58px;
+    min-height: 80px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
     transform-origin: bottom center;
   }
   .vote-card:hover:not(.vote-card-disabled) {
-    @apply border-indigo-300 shadow-md;
-    transform: translateY(-6px);
+    transform: translateY(-10px);
+    border-color: #6366F1;
+    background: #263348;
   }
   .vote-card.vote-card-selected {
-    @apply border-indigo-500 bg-indigo-50;
-    transform: translateY(-8px);
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.18);
+    transform: translateY(-12px);
+    border-color: #6366F1;
+    background: #1E1B4B;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
   }
   .vote-card.vote-card-disabled {
-    @apply opacity-40 cursor-not-allowed;
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* Vote bar */
+  .vote-bar {
+    background: #0F172A;
+    min-height: 100px;
   }
 
   /* Tab */

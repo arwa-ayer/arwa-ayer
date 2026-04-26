@@ -4,9 +4,11 @@ import { getPlayerId, getChannel, createPubNub } from '../pubsub';
 import VoteCard from '../components/VoteCard';
 import PlayerCard from '../components/PlayerCard';
 import FelixScreen from '../components/FelixScreen';
+import { AVATARS, CatAvatar } from '../cats/CatAvatars';
 
 const VOTE_VALUES = ['1', '2', '3', '5', '8', '13', '21', '?', '☕'];
 const MY_ID = getPlayerId();
+const MY_AVATAR = parseInt(localStorage.getItem('pp_avatar') || '0');
 
 function getAdminId(playersMap) {
   const ids = Object.keys(playersMap);
@@ -22,6 +24,7 @@ export default function RoomPage() {
   const [playerName] = useState(() => localStorage.getItem('playerName') || '');
   const [showNamePrompt, setShowNamePrompt] = useState(!localStorage.getItem('playerName'));
   const [nameInput, setNameInput] = useState('');
+  const [avatarInput, setAvatarInput] = useState(MY_AVATAR);
 
   const [players, setPlayers]     = useState([]);
   const [isAdmin, setIsAdmin]     = useState(false);
@@ -66,7 +69,7 @@ export default function RoomPage() {
     switch (msg.type) {
       case 'JOIN': {
         if (!s.players[msg.id]) {
-          s.players[msg.id] = { id: msg.id, name: msg.name, ts: msg.ts };
+          s.players[msg.id] = { id: msg.id, name: msg.name, ts: msg.ts, avatarId: msg.avatarId ?? 0 };
           s.adminId = getAdminId(s.players);
           if (s.adminId === MY_ID && msg.id !== MY_ID)
             setTimeout(() => pub({ type: 'STATE_SYNC', targetId: msg.id, state: shareableState() }), 300);
@@ -106,7 +109,7 @@ export default function RoomPage() {
     }
   }, [sync]);
 
-  function start(name) {
+  function start(name, avatarId) {
     if (started.current) return;
     started.current = true;
     const pn = createPubNub(MY_ID);
@@ -118,8 +121,8 @@ export default function RoomPage() {
         if (category === 'PNConnectedCategory') {
           setConnected(true);
           const ts = Date.now(); const s = sRef.current;
-          s.players[MY_ID] = { id: MY_ID, name, ts }; s.adminId = getAdminId(s.players); sync();
-          pub({ type: 'JOIN', id: MY_ID, name, ts });
+          s.players[MY_ID] = { id: MY_ID, name, ts, avatarId }; s.adminId = getAdminId(s.players); sync();
+          pub({ type: 'JOIN', id: MY_ID, name, ts, avatarId });
           setTimeout(() => pub({ type: 'STATE_REQUEST', id: MY_ID }), 600);
         }
         if (['PNNetworkIssuesCategory', 'PNNetworkDownCategory'].includes(category)) setConnected(false);
@@ -130,7 +133,7 @@ export default function RoomPage() {
   }
 
   useEffect(() => {
-    if (!showNamePrompt) start(playerName);
+    if (!showNamePrompt) start(playerName, MY_AVATAR);
     return () => {
       if (pnRef.current) { pub({ type: 'LEAVE', id: MY_ID }); pnRef.current.unsubscribeAll(); pnRef.current.destroy?.(); pnRef.current = null; }
     };
@@ -154,7 +157,9 @@ export default function RoomPage() {
   }
   function submitName() {
     const n = nameInput.trim(); if (!n) return;
-    localStorage.setItem('playerName', n); setShowNamePrompt(false);
+    localStorage.setItem('playerName', n);
+    localStorage.setItem('pp_avatar', String(avatarInput));
+    setShowNamePrompt(false);
   }
 
   const numVals = Object.values(votes).filter(v => !isNaN(Number(v))).map(Number);
@@ -165,8 +170,27 @@ export default function RoomPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="card w-full max-w-sm p-8 text-center">
         <div className="text-3xl mb-4">🃏</div>
-        <h2 className="text-xl font-bold text-gray-900 mb-1">Votre prénom</h2>
-        <p className="text-sm text-gray-500 mb-6">Pour rejoindre la session</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-1">Rejoindre la session</h2>
+        <p className="text-sm text-gray-500 mb-5">Choisissez votre avatar et entrez votre prénom</p>
+
+        {/* Mini avatar picker */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {AVATARS.map(av => (
+            <button key={av.id} onClick={() => setAvatarInput(av.id)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-150 ${
+                avatarInput === av.id
+                  ? 'bg-indigo-50 ring-2 ring-indigo-500'
+                  : 'hover:bg-gray-50 opacity-60 hover:opacity-100'
+              }`}
+            >
+              <CatAvatar id={av.id} size={44} />
+              <span className={`text-xs font-medium ${avatarInput === av.id ? 'text-indigo-600' : 'text-gray-400'}`}>
+                {av.name}
+              </span>
+            </button>
+          ))}
+        </div>
+
         <input className="input text-center text-base mb-4" placeholder="Ex : Alex"
           value={nameInput} onChange={e => setNameInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && submitName()} autoFocus />
@@ -176,18 +200,34 @@ export default function RoomPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
 
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+      {/* ── Header ── */}
+      <header className="bg-white border-b border-gray-200 flex-shrink-0 z-30">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
           <button onClick={() => navigate('/')}
             className="flex items-center gap-2 text-gray-900 font-bold text-base hover:text-indigo-600 transition-colors">
             <span>🃏</span> Planning Poker
           </button>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-gray-400 hidden sm:block">Code salon :</span>
+          {/* Story input (admin) or display */}
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:block">Story</span>
+            {isAdmin
+              ? <input
+                  className="flex-1 text-sm text-gray-800 bg-transparent border-0 outline-none
+                             border-b border-transparent hover:border-gray-300 focus:border-indigo-400
+                             px-1 py-0.5 transition-colors placeholder-gray-300"
+                  placeholder="Titre de la story en cours..."
+                  value={storyInput} onChange={e => handleStory(e.target.value)} maxLength={80} />
+              : <span className="flex-1 text-sm text-gray-600 truncate">
+                  {story || <span className="text-gray-400 italic text-xs">En attente d'une story…</span>}
+                </span>
+            }
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs text-gray-400 hidden sm:block">Salon :</span>
             <button onClick={copyCode}
               className="font-mono text-sm font-bold px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50
                          hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 transition-all">
@@ -199,93 +239,58 @@ export default function RoomPage() {
         </div>
       </header>
 
-      {/* Story bar */}
-      <div className="bg-white border-b border-gray-100 px-4 py-2.5">
-        <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Story</span>
-          {isAdmin
-            ? <input
-                className="flex-1 text-sm text-gray-800 bg-transparent border-0 outline-none
-                           border-b border-transparent hover:border-gray-300 focus:border-indigo-400
-                           px-1 py-0.5 transition-colors placeholder-gray-300"
-                placeholder="Titre de la story en cours..."
-                value={storyInput} onChange={e => handleStory(e.target.value)} maxLength={80} />
-            : <span className="flex-1 text-sm text-gray-700">
-                {story || <span className="text-gray-400 italic">En attente d'une story…</span>}
-              </span>
-          }
-        </div>
-      </div>
+      {/* ── Canvas (main playing area) ── */}
+      <main className="flex-1 overflow-y-auto relative" style={{
+        backgroundImage: 'radial-gradient(circle, #CBD5E1 1.5px, transparent 1.5px)',
+        backgroundSize: '28px 28px',
+        backgroundColor: '#F8FAFC',
+      }}>
+        <div className="min-h-full flex flex-col items-center justify-center gap-6 p-6 py-10">
 
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col lg:flex-row gap-6">
-
-        {/* LEFT — voting */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-bold text-gray-900">
-                {revealed ? 'Résultats' : 'Choisissez une carte'}
-              </h2>
-              {!revealed && myVote && (
-                <p className="text-xs text-indigo-600 font-medium mt-0.5">Vous avez voté : {myVote}</p>
-              )}
-            </div>
-            {revealed && avg && (
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-center shadow-sm">
-                <div className="text-xs text-gray-500 font-medium">Moyenne</div>
-                <div className="text-xl font-extrabold text-gray-900">{avg}</div>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-            {VOTE_VALUES.map(value => (
-              <VoteCard key={value} value={value} selected={myVote === value}
-                disabled={revealed} onClick={() => handleVote(value)} />
-            ))}
-          </div>
-
-          {/* Progress */}
-          {!revealed && (
-            <div className="mt-5 card p-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-gray-500">
-                  {hasVoted.size} / {players.length} votes
-                </span>
-                <span className="text-xs font-bold text-indigo-600">
-                  {players.length > 0 ? Math.round((hasVoted.size / players.length) * 100) : 0}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-1.5">
-                <div className="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
-                  style={{ width: `${players.length > 0 ? (hasVoted.size / players.length) * 100 : 0}%` }} />
-              </div>
-            </div>
-          )}
-
-          {/* Admin actions */}
+          {/* Admin action button */}
           {isAdmin && (
-            <div className="mt-4 flex gap-3">
+            <div>
               {!revealed ? (
                 <button onClick={handleReveal} disabled={hasVoted.size === 0}
-                  className="btn btn-primary btn-lg flex-1">
-                  Révéler les cartes {hasVoted.size > 0 && `(${hasVoted.size})`}
+                  className="btn btn-primary px-8 py-3 text-base font-bold shadow-lg shadow-indigo-200">
+                  Révéler les cartes {hasVoted.size > 0 && `(${hasVoted.size}/${players.length})`}
                 </button>
               ) : (
-                <button onClick={handleReset} className="btn btn-success btn-lg flex-1">
+                <button onClick={handleReset} className="btn btn-success px-8 py-3 text-base font-bold shadow-lg shadow-emerald-200">
                   Nouvelle manche
                 </button>
               )}
             </div>
           )}
-        </div>
 
-        {/* RIGHT — players */}
-        <div className="lg:w-72 flex-shrink-0">
-          <h2 className="text-base font-bold text-gray-900 mb-3">
-            Participants <span className="text-gray-400 font-normal text-sm">({players.length})</span>
-          </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
+          {/* Waiting message for non-admin */}
+          {!isAdmin && !revealed && (
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2 shadow-sm">
+              <p className="text-xs text-gray-500 font-medium">
+                {hasVoted.size === 0
+                  ? 'En attente des votes…'
+                  : `${hasVoted.size} / ${players.length} ont voté`
+                }
+              </p>
+            </div>
+          )}
+
+          {/* Progress bar (pre-reveal) */}
+          {!revealed && players.length > 0 && (
+            <div className="w-full max-w-xs">
+              <div className="flex justify-between text-xs text-gray-400 mb-1">
+                <span>{hasVoted.size} / {players.length}</span>
+                <span>{Math.round((hasVoted.size / players.length) * 100)}%</span>
+              </div>
+              <div className="w-full bg-white/80 rounded-full h-1.5 border border-gray-200">
+                <div className="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
+                  style={{ width: `${(hasVoted.size / players.length) * 100}%` }} />
+              </div>
+            </div>
+          )}
+
+          {/* Player cards */}
+          <div className="flex flex-wrap justify-center gap-5">
             {players.map(player => (
               <PlayerCard key={player.id} player={player}
                 isMe={player.id === MY_ID}
@@ -294,11 +299,41 @@ export default function RoomPage() {
                 revealed={revealed} />
             ))}
           </div>
-          {!isAdmin && !revealed && players.length > 0 && (
-            <p className="mt-4 text-center text-xs text-gray-400">
-              En attente que l'animateur révèle les cartes…
-            </p>
+
+          {/* Average + my vote after reveal */}
+          {revealed && (
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              {avg && (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-3 text-center">
+                  <div className="text-xs text-gray-500 font-medium mb-0.5">Moyenne</div>
+                  <div className="text-2xl font-extrabold text-gray-900">{avg}</div>
+                </div>
+              )}
+              {myVote && (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-3 text-center">
+                  <div className="text-xs text-gray-500 font-medium mb-0.5">Votre vote</div>
+                  <div className="text-2xl font-extrabold text-indigo-600">{myVote}</div>
+                </div>
+              )}
+            </div>
           )}
+
+          {/* My vote indicator (pre-reveal) */}
+          {!revealed && myVote && (
+            <div className="bg-white/90 backdrop-blur-sm border border-indigo-200 rounded-full px-4 py-1.5 shadow-sm">
+              <p className="text-xs font-semibold text-indigo-600">Votre vote : {myVote}</p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* ── Bottom vote bar ── */}
+      <div className="vote-bar flex-shrink-0">
+        <div className="flex items-center gap-2.5 overflow-x-auto px-4 py-3 justify-center">
+          {VOTE_VALUES.map(value => (
+            <VoteCard key={value} value={value} selected={myVote === value}
+              disabled={revealed} onClick={() => handleVote(value)} />
+          ))}
         </div>
       </div>
 
