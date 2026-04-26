@@ -50,8 +50,9 @@ export default function HomePage() {
           {['create', 'join'].map((t) => (
             <button key={t} onClick={() => { setTab(t); setError(''); }}
               className={`flex-1 py-3 font-comic text-xl tracking-wider transition-all duration-200 ${
-                tab === t ? 'bg-neon-pink text-white' : 'bg-transparent text-gray-400 hover:text-white'
-              }`}>
+                tab === t ? 'text-white' : 'bg-transparent text-gray-400 hover:text-white'
+              }`}
+              style={tab === t ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' } : {}}>
               {t === 'create' ? '✦ Créer' : '↗ Rejoindre'}
             </button>
           ))}

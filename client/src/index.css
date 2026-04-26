@@ -40,12 +40,15 @@
   }
 
   .btn-neon-pink {
-    @apply btn-neon bg-neon-pink border-neon-pink text-white;
-    box-shadow: 0 0 20px rgba(255, 45, 120, 0.5);
+    @apply btn-neon text-white;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    border-color: #6366F1;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.45);
   }
 
   .btn-neon-pink:hover {
-    box-shadow: 0 0 40px rgba(255, 45, 120, 0.8);
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.8), 0 0 80px rgba(139, 92, 246, 0.3);
     transform: translateY(-2px);
   }
 
