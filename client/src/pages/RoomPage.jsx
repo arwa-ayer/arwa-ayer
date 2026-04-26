@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPlayerId, getChannel, createPubNub } from '../pubsub';
-import { CAT_VALUES } from '../cats/CatSvgs';
-import CatCard from '../components/CatCard';
+import VoteCard from '../components/VoteCard';
 import PlayerCard from '../components/PlayerCard';
 import FelixScreen from '../components/FelixScreen';
+
+const VOTE_VALUES = ['1', '2', '3', '5', '8', '13', '21', '?', '☕'];
 
 const MY_ID = getPlayerId();
 
@@ -265,12 +266,11 @@ export default function RoomPage() {
   if (showNamePrompt) return (
     <div className="min-h-screen bg-dark halftone flex items-center justify-center p-4">
       <div className="comic-card w-full max-w-sm p-8 text-center">
-        <div className="text-5xl mb-4">🐱</div>
         <h2 className="font-comic text-3xl text-neon-yellow mb-6">Ton prénom ?</h2>
-        <input className="comic-input text-center text-xl mb-4" placeholder="Ex: Félix"
+        <input className="comic-input text-center text-xl mb-4" placeholder="Ex: Alex"
           value={nameInput} onChange={e => setNameInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && submitName()} autoFocus />
-        <button onClick={submitName} className="btn-neon-pink w-full">Entrer 🐾</button>
+        <button onClick={submitName} className="btn-neon-pink w-full">Entrer</button>
       </div>
     </div>
   );
@@ -282,7 +282,7 @@ export default function RoomPage() {
       <header className="border-b border-dark-border bg-dark-card/80 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4 flex-wrap">
           <button onClick={() => navigate('/')} className="font-comic text-2xl text-neon-yellow tracking-wider">
-            🐱 POKER CATS
+            PLANNING POKER
           </button>
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-gray-400 text-sm hidden sm:block">Code:</span>
@@ -324,8 +324,8 @@ export default function RoomPage() {
           </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-            {CAT_VALUES.map(value => (
-              <CatCard key={value} value={value} selected={myVote === value}
+            {VOTE_VALUES.map(value => (
+              <VoteCard key={value} value={value} selected={myVote === value}
                 disabled={revealed} onClick={() => handleVote(value)} />
             ))}
           </div>
