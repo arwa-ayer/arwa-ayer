@@ -5,101 +5,10 @@ const PAWS = Array.from({ length: 14 }, (_, i) => ({
   left: 5 + (i * 7) % 90,
   delay: (i * 0.15) % 1.8,
   duration: 2 + (i * 0.3) % 1.5,
-  size: 18 + (i * 5) % 16,
+  size: 20 + (i * 4) % 14,
 }));
 
-function BlackSuperheroCat({ size = 148, showCostume }) {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"
-      style={{ width: size, height: size, display: 'block', borderRadius: '50%' }}>
-      <defs>
-        <radialGradient id="bgGlow" cx="50%" cy="45%" r="55%">
-          <stop offset="0%" stopColor="#1E1B4B" />
-          <stop offset="100%" stopColor="#0F0F1A" />
-        </radialGradient>
-        <radialGradient id="eyeGlow" cx="35%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#FDE68A" />
-          <stop offset="60%" stopColor="#F59E0B" />
-          <stop offset="100%" stopColor="#D97706" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      {/* Background */}
-      <circle cx="100" cy="100" r="100" fill="url(#bgGlow)" />
-
-      {/* Cape */}
-      {showCostume && (
-        <polygon points="62,138 100,196 138,138 128,148 100,180 72,148"
-          fill="#B91C1C" opacity="0.95" />
-      )}
-
-      {/* Ears */}
-      <polygon points="58,82 44,22 86,70" fill="#111" />
-      <polygon points="142,82 156,22 114,70" fill="#111" />
-      {/* Inner ears */}
-      <polygon points="63,78 52,36 82,70" fill="#3B0000" opacity="0.7" />
-      <polygon points="137,78 148,36 118,70" fill="#3B0000" opacity="0.7" />
-
-      {/* Head */}
-      <circle cx="100" cy="108" r="52" fill="#111" />
-
-      {/* Eye glow halos */}
-      <ellipse cx="80" cy="103" rx="17" ry="16" fill="#F59E0B" opacity="0.18" />
-      <ellipse cx="120" cy="103" rx="17" ry="16" fill="#F59E0B" opacity="0.18" />
-
-      {/* Eyes — sclera */}
-      <ellipse cx="80" cy="103" rx="13" ry="14" fill="#1a1000" />
-      <ellipse cx="120" cy="103" rx="13" ry="14" fill="#1a1000" />
-
-      {/* Eyes — iris */}
-      <ellipse cx="80" cy="103" rx="11" ry="12" fill="url(#eyeGlow)" />
-      <ellipse cx="120" cy="103" rx="11" ry="12" fill="url(#eyeGlow)" />
-
-      {/* Pupils */}
-      <ellipse cx="80" cy="104" rx="4" ry="10" fill="#060606" />
-      <ellipse cx="120" cy="104" rx="4" ry="10" fill="#060606" />
-
-      {/* Eye catch lights */}
-      <circle cx="75" cy="97" r="3.5" fill="white" opacity="0.55" />
-      <circle cx="115" cy="97" r="3.5" fill="white" opacity="0.55" />
-      <circle cx="83" cy="100" r="1.5" fill="white" opacity="0.3" />
-      <circle cx="123" cy="100" r="1.5" fill="white" opacity="0.3" />
-
-      {/* Hero mask */}
-      {showCostume && (
-        <>
-          <path d="M55,96 Q80,82 100,96 Q120,82 145,96 L142,104 Q120,90 100,103 Q80,90 58,104 Z"
-            fill="#1E3A8A" opacity="0.9" />
-          <ellipse cx="74" cy="94" rx="12" ry="8" fill="#1E3A8A" opacity="0.9" />
-          <ellipse cx="126" cy="94" rx="12" ry="8" fill="#1E3A8A" opacity="0.9" />
-        </>
-      )}
-
-      {/* Nose */}
-      <path d="M100,119 L96,114 L104,114 Z" fill="#4B0082" opacity="0.8" />
-      {/* Mouth */}
-      <path d="M94,122 Q100,128 106,122" fill="none" stroke="#333" strokeWidth="1.8" strokeLinecap="round" />
-
-      {/* Whiskers */}
-      <line x1="20" y1="118" x2="86" y2="120" stroke="rgba(255,255,255,0.22)" strokeWidth="1.3" />
-      <line x1="22" y1="126" x2="86" y2="125" stroke="rgba(255,255,255,0.22)" strokeWidth="1.3" />
-      <line x1="114" y1="120" x2="180" y2="118" stroke="rgba(255,255,255,0.22)" strokeWidth="1.3" />
-      <line x1="114" y1="125" x2="178" y2="126" stroke="rgba(255,255,255,0.22)" strokeWidth="1.3" />
-
-      {/* Body */}
-      <ellipse cx="100" cy="168" rx="36" ry="26" fill="#111" />
-
-      {/* Star badge on chest */}
-      {showCostume && (
-        <text x="100" y="176" textAnchor="middle" fontSize="18" fill="#FCD34D" fontFamily="sans-serif">★</text>
-      )}
-    </svg>
-  );
-}
+const BLACK_CAT_IMG = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f408-200d-2b1b.svg';
 
 export default function FelixScreen({ value, onDismiss }) {
   const [phase, setPhase] = useState(0);
@@ -121,6 +30,10 @@ export default function FelixScreen({ value, onDismiss }) {
     return () => window.removeEventListener('keydown', fn);
   }, [onDismiss]);
 
+  const glow = phase >= 3
+    ? '0 0 0 4px #FCD34D, 0 0 50px rgba(252,211,77,0.5), 0 0 100px rgba(252,211,77,0.2)'
+    : '0 4px 30px rgba(0,0,0,0.5)';
+
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
@@ -131,47 +44,114 @@ export default function FelixScreen({ value, onDismiss }) {
       }}
       onClick={onDismiss}
     >
-      {/* White flash */}
+      {/* Flash */}
       {phase === 2 && (
-        <div className="absolute inset-0 pointer-events-none"
+        <div className="absolute inset-0 pointer-events-none bg-white"
           style={{ animation: 'heroFlash 0.35s ease-out forwards' }} />
       )}
 
-      {/* Floating paw prints */}
+      {/* Floating paws */}
       {phase >= 5 && PAWS.map(p => (
         <div key={p.id} className="absolute pointer-events-none select-none"
           style={{
             left: `${p.left}%`, bottom: '-10px',
             fontSize: p.size,
             animation: `starRise ${p.duration}s ease-out ${p.delay}s infinite`,
-          }}>
-          🐾
-        </div>
+          }}>🐾</div>
       ))}
 
-      <div className="flex flex-col items-center gap-5 px-6" onClick={e => e.stopPropagation()}>
+      <div className="flex flex-col items-center gap-6 px-6" onClick={e => e.stopPropagation()}>
 
-        {/* Cat */}
-        <div
+        {/* Cat + costume */}
+        <div className="relative flex items-center justify-center"
           style={{
             transform: phase >= 1 ? 'scale(1)' : 'scale(0)',
             transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            boxShadow: phase >= 3 ? '0 0 0 4px #FCD34D, 0 0 40px rgba(252,211,77,0.45)' : 'none',
+          }}>
+
+          {/* Cape */}
+          {phase >= 3 && (
+            <div className="absolute -bottom-5 left-1/2 -z-10"
+              style={{
+                transform: 'translateX(-50%)',
+                animation: 'capeUnfurl 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+              }}>
+              <div style={{
+                width: 0, height: 0,
+                borderLeft: '72px solid transparent',
+                borderRight: '72px solid transparent',
+                borderTop: '115px solid #DC2626',
+                filter: 'drop-shadow(0 8px 16px rgba(220,38,38,0.6))',
+              }} />
+            </div>
+          )}
+
+          {/* Cat image in circle */}
+          <div style={{
+            width: 164,
+            height: 164,
             borderRadius: '50%',
-            transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
-          }}
-        >
-          <BlackSuperheroCat size={152} showCostume={phase >= 3} />
+            background: 'radial-gradient(circle at 40% 35%, #1E293B, #0F172A)',
+            border: `4px solid ${phase >= 3 ? '#FCD34D' : '#334155'}`,
+            boxShadow: glow,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            transition: 'border 0.3s, box-shadow 0.4s',
+            position: 'relative',
+          }}>
+            <img
+              src={BLACK_CAT_IMG}
+              alt="Captain Felix"
+              width={130}
+              height={130}
+              style={{
+                display: 'block',
+                filter: phase >= 3
+                  ? 'drop-shadow(0 0 12px rgba(252,211,77,0.7))'
+                  : 'none',
+                transition: 'filter 0.3s',
+                marginTop: 8,
+              }}
+              draggable={false}
+            />
+          </div>
+
+          {/* Hero mask overlay */}
+          {phase >= 3 && (
+            <div className="absolute"
+              style={{
+                top: '34%', left: '50%',
+                transform: 'translateX(-50%)',
+                width: '68%',
+                animation: 'maskSlide 0.3s ease-out forwards',
+              }}>
+              <svg viewBox="0 0 100 28" width="100%">
+                <path d="M5,14 Q25,2 50,14 Q75,2 95,14 L95,22 Q75,10 50,20 Q25,10 5,22 Z" fill="#1E3A8A" opacity="0.88"/>
+                <ellipse cx="22" cy="12" rx="13" ry="9" fill="#1E3A8A" opacity="0.88"/>
+                <ellipse cx="78" cy="12" rx="13" ry="9" fill="#1E3A8A" opacity="0.88"/>
+              </svg>
+            </div>
+          )}
+
+          {/* Star badge */}
+          {phase >= 3 && (
+            <div className="absolute -bottom-1 -right-1 text-2xl"
+              style={{ animation: 'badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
+              ⭐
+            </div>
+          )}
         </div>
 
         {/* Value + FELIX */}
         {phase >= 4 && (
           <div className="text-center" style={{ animation: 'heroTextIn 0.45s ease-out forwards' }}>
-            <div className="text-7xl font-extrabold text-white tracking-tight drop-shadow-lg leading-none mb-2">
+            <div className="text-7xl font-extrabold text-white tracking-tight drop-shadow-lg leading-none mb-3">
               {value}
             </div>
             <div className="text-yellow-400 font-extrabold text-2xl tracking-widest uppercase"
-              style={{ letterSpacing: '0.18em' }}>
+              style={{ letterSpacing: '0.2em' }}>
               F E L I X
             </div>
           </div>
@@ -186,7 +166,7 @@ export default function FelixScreen({ value, onDismiss }) {
 
         {phase >= 4 && (
           <button onClick={onDismiss}
-            className="mt-1 px-7 py-2.5 bg-yellow-400 text-gray-900 font-bold rounded-xl
+            className="px-8 py-3 bg-yellow-400 text-gray-900 font-bold rounded-xl text-base
                        hover:bg-yellow-300 transition-colors shadow-lg"
             style={{ animation: 'heroTextIn 0.45s 0.3s ease-out both' }}>
             Continuer
