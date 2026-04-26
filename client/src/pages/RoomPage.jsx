@@ -332,7 +332,7 @@ export default function RoomPage() {
           )}
 
           {/* Player cards */}
-          <div className="flex flex-wrap justify-center gap-5">
+          <div className="flex flex-wrap justify-center gap-8">
             {players.map(player => (
               <PlayerCard key={player.id} player={player}
                 isMe={player.id === MY_ID}

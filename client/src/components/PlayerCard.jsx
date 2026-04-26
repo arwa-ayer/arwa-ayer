@@ -16,32 +16,32 @@ export default function PlayerCard({ player, isMe, hasVoted, vote, revealed }) {
   const avatarId = player.avatarId ?? 0;
 
   return (
-    <div className={`flex flex-col items-center gap-2 transition-transform duration-150 ${isMe ? 'scale-110' : ''}`}>
+    <div className={`flex flex-col items-center gap-2.5 transition-transform duration-150 ${isMe ? 'scale-110' : ''}`}>
 
       {/* Avatar */}
       <div className={`relative ${isMe ? 'ring-2 ring-indigo-500 ring-offset-2 rounded-full' : ''}`}>
-        <CatAvatar id={avatarId} size={50} />
+        <CatAvatar id={avatarId} size={72} />
         {player.isAdmin && (
-          <span className="absolute -top-1 -right-1 text-xs leading-none">👑</span>
+          <span className="absolute -top-1 -right-1 text-sm leading-none">👑</span>
         )}
       </div>
 
       {/* Name */}
-      <span className={`text-xs font-semibold truncate max-w-[72px] text-center ${
+      <span className={`text-sm font-semibold truncate max-w-[90px] text-center ${
         isMe ? 'text-indigo-600' : 'text-gray-700'
       }`}>
         {player.name}
       </span>
 
       {/* Vote card */}
-      <div className="w-[52px] h-[72px]">
+      <div className="w-[68px] h-[96px]">
         {!hasVoted && !revealed ? (
-          <div className="w-full h-full rounded-xl border-2 border-dashed border-gray-300 bg-white/60 flex items-center justify-center text-gray-300 text-xl font-bold">
+          <div className="w-full h-full rounded-xl border-2 border-dashed border-gray-300 bg-white/60 flex items-center justify-center text-gray-300 text-2xl font-bold">
             —
           </div>
         ) : !revealed ? (
           <div className="w-full h-full rounded-xl bg-indigo-600 shadow-md flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-white opacity-70 animate-bounce" />
+            <div className="w-2.5 h-2.5 rounded-full bg-white opacity-70 animate-bounce" />
           </div>
         ) : (
           <div className="card-3d-wrapper w-full h-full">
@@ -51,7 +51,7 @@ export default function PlayerCard({ player, isMe, hasVoted, vote, revealed }) {
               </div>
               <div className="card-face card-face-back">
                 <div className="w-full h-full rounded-xl bg-white border-2 border-gray-200 shadow flex items-center justify-center">
-                  <span className="text-xl font-extrabold text-gray-900">{vote ?? '—'}</span>
+                  <span className="text-2xl font-extrabold text-gray-900">{vote ?? '—'}</span>
                 </div>
               </div>
             </div>
