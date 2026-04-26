@@ -82,13 +82,14 @@ export default function FelixScreen({ value, onDismiss }) {
 
           {/* Cat avatar */}
           <img
-            src="https://cat-avatars.vercel.app/api/cat?name=CaptainFelixHero"
-            alt="Super Cat"
+            src="https://cat-avatars.vercel.app/api/cat?name=CaptainFelix"
+            alt="Captain Felix"
             width={148}
             height={148}
             style={{
               borderRadius: '50%',
               display: 'block',
+              filter: 'grayscale(1) brightness(0.18) contrast(1.1)',
               border: phase >= 3 ? '4px solid #FCD34D' : '4px solid white',
               boxShadow: phase >= 3
                 ? '0 0 0 4px rgba(252,211,77,0.3), 0 0 40px rgba(252,211,77,0.5)'
