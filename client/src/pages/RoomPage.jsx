@@ -38,6 +38,7 @@ export default function RoomPage() {
   const [consensusValue, setConsensusValue] = useState(null);
   const [connected, setConnected] = useState(false);
   const [copied, setCopied]       = useState(false);
+  const [showQR, setShowQR]       = useState(false);
 
   const sRef = useRef({ players: {}, votes: {}, pending: {}, hasVoted: new Set(), revealed: false, story: '', adminId: null });
   const pnRef = useRef(null);
@@ -255,8 +256,33 @@ export default function RoomPage() {
                          bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
               {copied ? '✓ Copié' : 'Copier'}
             </button>
+            <button onClick={() => setShowQR(v => !v)}
+              title="QR Code"
+              className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                showQR
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50'
+              }`}>
+              QR
+            </button>
           </div>
         </div>
+
+        {/* QR code panel */}
+        {showQR && (
+          <div className="max-w-7xl mx-auto mt-3 mb-1 flex justify-center">
+            <div className="bg-white rounded-2xl border border-indigo-100 shadow-md p-4 flex flex-col items-center gap-2">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=6&data=${encodeURIComponent(`${window.location.origin}${window.location.pathname}?room=${roomId}`)}`}
+                alt="QR Code"
+                width={180}
+                height={180}
+                className="rounded-lg"
+              />
+              <p className="text-xs text-gray-400 font-mono">{roomId}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Canvas (main playing area) ── */}
