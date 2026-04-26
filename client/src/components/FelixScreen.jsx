@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 
-const STARS = Array.from({ length: 14 }, (_, i) => ({
+const PAWS = Array.from({ length: 14 }, (_, i) => ({
   id: i,
   left: 5 + (i * 7) % 90,
   delay: (i * 0.15) % 1.8,
@@ -44,15 +44,15 @@ export default function FelixScreen({ value, onDismiss }) {
         <div className="absolute inset-0 pointer-events-none" style={{ animation: 'heroFlash 0.35s ease-out forwards' }} />
       )}
 
-      {/* Floating stars */}
-      {phase >= 5 && STARS.map(s => (
-        <div key={s.id} className="absolute pointer-events-none select-none"
+      {/* Floating paw prints */}
+      {phase >= 5 && PAWS.map(p => (
+        <div key={p.id} className="absolute pointer-events-none select-none"
           style={{
-            left: `${s.left}%`, bottom: '-10px',
-            fontSize: s.size,
-            animation: `starRise ${s.duration}s ease-out ${s.delay}s infinite`,
+            left: `${p.left}%`, bottom: '-10px',
+            fontSize: p.size,
+            animation: `starRise ${p.duration}s ease-out ${p.delay}s infinite`,
           }}>
-          ⭐
+          🐾
         </div>
       ))}
 
@@ -82,7 +82,7 @@ export default function FelixScreen({ value, onDismiss }) {
 
           {/* Cat avatar */}
           <img
-            src="https://cat-avatars.vercel.app/api/cat?name=SuperHerocat"
+            src="https://cat-avatars.vercel.app/api/cat?name=CaptainFelixHero"
             alt="Super Cat"
             width={148}
             height={148}
@@ -131,15 +131,15 @@ export default function FelixScreen({ value, onDismiss }) {
             <div className="text-7xl font-extrabold text-white tracking-tight drop-shadow-lg leading-none mb-2">
               {value}
             </div>
-            <div className="text-yellow-400 font-extrabold text-xl tracking-wide uppercase">
-              Super-héros ! 🦸
+            <div className="text-yellow-400 font-extrabold text-2xl tracking-widest uppercase" style={{ letterSpacing: '0.18em' }}>
+              F E L I X
             </div>
           </div>
         )}
 
         {phase >= 4 && (
           <p className="text-white/60 text-sm font-medium" style={{ animation: 'heroTextIn 0.45s 0.15s ease-out both' }}>
-            Tout le monde est d'accord.
+            Tout le monde est d'accord 🐾
           </p>
         )}
 
