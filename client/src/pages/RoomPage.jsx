@@ -229,16 +229,35 @@ export default function RoomPage() {
 
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-gray-400 hidden sm:block">Salon :</span>
-            <button onClick={copyCode}
-              className="text-sm font-bold px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50
-                         hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 transition-all">
-              {copied ? '✓ Lien copié !' : `🔗 ${roomId}`}
-            </button>
+            <span className="font-mono text-sm font-bold text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50">
+              {roomId}
+            </span>
           </div>
 
           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${connected ? 'bg-emerald-500' : 'bg-red-400'}`} />
         </div>
       </header>
+
+      {/* ── Invite link bar ── */}
+      <div className="bg-indigo-50 border-b border-indigo-100 px-4 py-2 flex-shrink-0">
+        <div className="max-w-7xl mx-auto flex items-center gap-3">
+          <span className="text-xs font-semibold text-indigo-400 whitespace-nowrap hidden sm:block">Lien d'invitation</span>
+          <div className="flex-1 flex items-center gap-2 min-w-0">
+            <input
+              readOnly
+              value={`${window.location.origin}${window.location.pathname}?room=${roomId}`}
+              className="flex-1 text-xs font-mono text-indigo-700 bg-white border border-indigo-200
+                         rounded-lg px-3 py-1.5 outline-none select-all cursor-text truncate"
+              onClick={e => e.target.select()}
+            />
+            <button onClick={copyCode}
+              className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg
+                         bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+              {copied ? '✓ Copié' : 'Copier'}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* ── Canvas (main playing area) ── */}
       <main className="flex-1 overflow-y-auto relative bg-slate-50">
