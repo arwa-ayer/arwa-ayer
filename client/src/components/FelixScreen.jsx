@@ -8,7 +8,70 @@ const PAWS = Array.from({ length: 14 }, (_, i) => ({
   size: 20 + (i * 4) % 14,
 }));
 
-const BLACK_CAT_IMG = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f408-200d-2b1b.svg';
+function HappyTuxedoCat({ size = 152, showCape }) {
+  return (
+    <svg viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg"
+      style={{ width: size, height: size, display: 'block', borderRadius: '50%' }}>
+
+      {/* Beige background */}
+      <circle cx="100" cy="100" r="100" fill="#E8D4A8" />
+
+      {/* Left ear */}
+      <polygon points="46,84 32,16 80,70" fill="#232323" />
+      <polygon points="51,80 40,28 74,68" fill="#5A3535" opacity="0.55" />
+      {/* Right ear */}
+      <polygon points="154,84 168,16 120,70" fill="#232323" />
+      <polygon points="149,80 160,28 126,68" fill="#5A3535" opacity="0.55" />
+
+      {/* Head */}
+      <circle cx="100" cy="108" r="68" fill="#232323" />
+
+      {/* White face patch — narrow at top, wide at muzzle */}
+      <path d="M100,44 C96,44 80,66 76,92 C73,115 76,146 100,154 C124,146 127,115 124,92 C120,66 104,44 100,44 Z"
+        fill="#F0EDE4" />
+
+      {/* Eyebrow marks */}
+      <path d="M62,86 Q72,80 82,86" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M118,86 Q128,80 138,86" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
+
+      {/* Closed happy eyes */}
+      <path d="M62,96 Q74,84 86,96" fill="none" stroke="#1a1a1a" strokeWidth="4.5" strokeLinecap="round" />
+      <path d="M114,96 Q126,84 138,96" fill="none" stroke="#1a1a1a" strokeWidth="4.5" strokeLinecap="round" />
+
+      {/* Nose */}
+      <ellipse cx="100" cy="114" rx="7" ry="5.5" fill="#1a1a1a" />
+
+      {/* Open mouth cavity */}
+      <path d="M78,124 Q100,154 122,124 Z" fill="#1a1a1a" />
+      {/* Upper lip edge */}
+      <path d="M78,124 Q100,120 122,124" fill="none" stroke="#F0EDE4" strokeWidth="2.2" strokeLinecap="round" />
+      {/* Tongue */}
+      <ellipse cx="100" cy="141" rx="15" ry="9" fill="#E8697A" />
+      {/* Tongue center line */}
+      <line x1="100" y1="133" x2="100" y2="148" stroke="#D4556A" strokeWidth="1.5" />
+
+      {/* Whiskers left */}
+      <line x1="22" y1="112" x2="80" y2="117" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
+      <line x1="24" y1="122" x2="80" y2="122" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
+      <line x1="28" y1="131" x2="80" y2="128" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Whiskers right */}
+      <line x1="120" y1="117" x2="178" y2="112" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
+      <line x1="120" y1="122" x2="176" y2="122" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
+      <line x1="120" y1="128" x2="172" y2="131" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" />
+
+      {/* Body */}
+      <ellipse cx="100" cy="192" rx="56" ry="38" fill="#232323" />
+      {/* White chest */}
+      <ellipse cx="100" cy="188" rx="32" ry="30" fill="#F0EDE4" />
+
+      {/* Cape */}
+      {showCape && (
+        <polygon points="52,172 100,210 148,172 136,185 100,205 64,185"
+          fill="#B91C1C" opacity="0.95" />
+      )}
+    </svg>
+  );
+}
 
 export default function FelixScreen({ value, onDismiss }) {
   const [phase, setPhase] = useState(0);
@@ -29,10 +92,6 @@ export default function FelixScreen({ value, onDismiss }) {
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
   }, [onDismiss]);
-
-  const glow = phase >= 3
-    ? '0 0 0 4px #FCD34D, 0 0 50px rgba(252,211,77,0.5), 0 0 100px rgba(252,211,77,0.2)'
-    : '0 4px 30px rgba(0,0,0,0.5)';
 
   return (
     <div
@@ -62,86 +121,19 @@ export default function FelixScreen({ value, onDismiss }) {
 
       <div className="flex flex-col items-center gap-6 px-6" onClick={e => e.stopPropagation()}>
 
-        {/* Cat + costume */}
-        <div className="relative flex items-center justify-center"
+        {/* Cat */}
+        <div
           style={{
             transform: phase >= 1 ? 'scale(1)' : 'scale(0)',
             transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          }}>
-
-          {/* Cape */}
-          {phase >= 3 && (
-            <div className="absolute -bottom-5 left-1/2 -z-10"
-              style={{
-                transform: 'translateX(-50%)',
-                animation: 'capeUnfurl 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
-              }}>
-              <div style={{
-                width: 0, height: 0,
-                borderLeft: '72px solid transparent',
-                borderRight: '72px solid transparent',
-                borderTop: '115px solid #DC2626',
-                filter: 'drop-shadow(0 8px 16px rgba(220,38,38,0.6))',
-              }} />
-            </div>
-          )}
-
-          {/* Cat image in circle */}
-          <div style={{
-            width: 164,
-            height: 164,
             borderRadius: '50%',
-            background: 'radial-gradient(circle at 40% 35%, #1E293B, #0F172A)',
-            border: `4px solid ${phase >= 3 ? '#FCD34D' : '#334155'}`,
-            boxShadow: glow,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            transition: 'border 0.3s, box-shadow 0.4s',
-            position: 'relative',
-          }}>
-            <img
-              src={BLACK_CAT_IMG}
-              alt="Captain Felix"
-              width={130}
-              height={130}
-              style={{
-                display: 'block',
-                filter: phase >= 3
-                  ? 'drop-shadow(0 0 12px rgba(252,211,77,0.7))'
-                  : 'none',
-                transition: 'filter 0.3s',
-                marginTop: 8,
-              }}
-              draggable={false}
-            />
-          </div>
-
-          {/* Hero mask overlay */}
-          {phase >= 3 && (
-            <div className="absolute"
-              style={{
-                top: '34%', left: '50%',
-                transform: 'translateX(-50%)',
-                width: '68%',
-                animation: 'maskSlide 0.3s ease-out forwards',
-              }}>
-              <svg viewBox="0 0 100 28" width="100%">
-                <path d="M5,14 Q25,2 50,14 Q75,2 95,14 L95,22 Q75,10 50,20 Q25,10 5,22 Z" fill="#1E3A8A" opacity="0.88"/>
-                <ellipse cx="22" cy="12" rx="13" ry="9" fill="#1E3A8A" opacity="0.88"/>
-                <ellipse cx="78" cy="12" rx="13" ry="9" fill="#1E3A8A" opacity="0.88"/>
-              </svg>
-            </div>
-          )}
-
-          {/* Star badge */}
-          {phase >= 3 && (
-            <div className="absolute -bottom-1 -right-1 text-2xl"
-              style={{ animation: 'badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
-              ⭐
-            </div>
-          )}
+            boxShadow: phase >= 3
+              ? '0 0 0 5px #FCD34D, 0 0 50px rgba(252,211,77,0.5)'
+              : '0 4px 30px rgba(0,0,0,0.5)',
+            transition: 'transform 0.55s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease',
+          }}
+        >
+          <HappyTuxedoCat size={160} showCape={phase >= 3} />
         </div>
 
         {/* Value + FELIX */}
@@ -150,7 +142,7 @@ export default function FelixScreen({ value, onDismiss }) {
             <div className="text-7xl font-extrabold text-white tracking-tight drop-shadow-lg leading-none mb-3">
               {value}
             </div>
-            <div className="text-yellow-400 font-extrabold text-2xl tracking-widest uppercase"
+            <div className="text-yellow-400 font-extrabold text-2xl tracking-widest"
               style={{ letterSpacing: '0.2em' }}>
               F E L I X
             </div>
