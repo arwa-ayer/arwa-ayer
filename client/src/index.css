@@ -161,6 +161,27 @@
   100% { transform: translateY(-90vh) rotate(720deg) scale(0.4); opacity: 0; }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes spinReverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes bgPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -62%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -62%) scale(1.1); }
+}
+@keyframes powerGlow {
+  0%, 100% { box-shadow: 0 0 0 2px #F97316, 0 0 40px rgba(252,211,77,0.6), 0 0 80px rgba(99,102,241,0.35); }
+  50%       { box-shadow: 0 0 0 4px #FCD34D, 0 0 60px rgba(252,211,77,0.9), 0 0 100px rgba(99,102,241,0.5); }
+}
+@keyframes floatBolt {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-8px) scale(1.2); }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #F3F4F6; }

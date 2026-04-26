@@ -1,75 +1,39 @@
 import { useEffect, useState } from 'react';
 
-const PAWS = Array.from({ length: 14 }, (_, i) => ({
+const PARTICLES = Array.from({ length: 16 }, (_, i) => ({
   id: i,
-  left: 5 + (i * 7) % 90,
-  delay: (i * 0.15) % 1.8,
-  duration: 2 + (i * 0.3) % 1.5,
-  size: 20 + (i * 4) % 14,
+  left: 4 + (i * 6.2) % 92,
+  delay: (i * 0.12) % 2,
+  duration: 1.8 + (i * 0.25) % 1.4,
+  size: 18 + (i * 5) % 16,
+  icon: i % 3 === 0 ? '⚡' : '🐾',
 }));
 
-function HappyTuxedoCat({ size = 152, showCape }) {
+function EnergyRing({ visible, size }) {
+  if (!visible) return null;
+  const r = size / 2 + 14;
+  const cx = r + 2;
   return (
-    <svg viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg"
-      style={{ width: size, height: size, display: 'block', borderRadius: '50%' }}>
-
-      {/* Beige background */}
-      <circle cx="100" cy="100" r="100" fill="#E8D4A8" />
-
-      {/* Left ear */}
-      <polygon points="46,84 32,16 80,70" fill="#232323" />
-      <polygon points="51,80 40,28 74,68" fill="#5A3535" opacity="0.55" />
-      {/* Right ear */}
-      <polygon points="154,84 168,16 120,70" fill="#232323" />
-      <polygon points="149,80 160,28 126,68" fill="#5A3535" opacity="0.55" />
-
-      {/* Head */}
-      <circle cx="100" cy="108" r="68" fill="#232323" />
-
-      {/* White face patch — narrow at top, wide at muzzle */}
-      <path d="M100,44 C96,44 80,66 76,92 C73,115 76,146 100,154 C124,146 127,115 124,92 C120,66 104,44 100,44 Z"
-        fill="#F0EDE4" />
-
-      {/* Eyebrow marks */}
-      <path d="M62,86 Q72,80 82,86" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M118,86 Q128,80 138,86" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-
-      {/* Closed happy eyes */}
-      <path d="M62,96 Q74,84 86,96" fill="none" stroke="#1a1a1a" strokeWidth="4.5" strokeLinecap="round" />
-      <path d="M114,96 Q126,84 138,96" fill="none" stroke="#1a1a1a" strokeWidth="4.5" strokeLinecap="round" />
-
-      {/* Nose */}
-      <ellipse cx="100" cy="114" rx="7" ry="5.5" fill="#1a1a1a" />
-
-      {/* Open mouth cavity */}
-      <path d="M78,124 Q100,154 122,124 Z" fill="#1a1a1a" />
-      {/* Upper lip edge */}
-      <path d="M78,124 Q100,120 122,124" fill="none" stroke="#F0EDE4" strokeWidth="2.2" strokeLinecap="round" />
-      {/* Tongue */}
-      <ellipse cx="100" cy="141" rx="15" ry="9" fill="#E8697A" />
-      {/* Tongue center line */}
-      <line x1="100" y1="133" x2="100" y2="148" stroke="#D4556A" strokeWidth="1.5" />
-
-      {/* Whiskers left */}
-      <line x1="22" y1="112" x2="80" y2="117" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
-      <line x1="24" y1="122" x2="80" y2="122" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
-      <line x1="28" y1="131" x2="80" y2="128" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Whiskers right */}
-      <line x1="120" y1="117" x2="178" y2="112" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
-      <line x1="120" y1="122" x2="176" y2="122" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" />
-      <line x1="120" y1="128" x2="172" y2="131" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" />
-
-      {/* Body */}
-      <ellipse cx="100" cy="192" rx="56" ry="38" fill="#232323" />
-      {/* White chest */}
-      <ellipse cx="100" cy="188" rx="32" ry="30" fill="#F0EDE4" />
-
-      {/* Cape */}
-      {showCape && (
-        <polygon points="52,172 100,210 148,172 136,185 100,205 64,185"
-          fill="#B91C1C" opacity="0.95" />
-      )}
-    </svg>
+    <div className="absolute pointer-events-none" style={{
+      top: -(r - size / 2) - 2,
+      left: -(r - size / 2) - 2,
+      width: cx * 2,
+      height: cx * 2,
+      animation: 'spin 2.5s linear infinite',
+    }}>
+      <svg viewBox={`0 0 ${cx * 2} ${cx * 2}`} width={cx * 2} height={cx * 2}>
+        <circle cx={cx} cy={cx} r={r} fill="none"
+          stroke="url(#ringGrad)" strokeWidth="3.5"
+          strokeDasharray="22 10" strokeLinecap="round" />
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FCD34D" />
+            <stop offset="50%" stopColor="#F97316" />
+            <stop offset="100%" stopColor="#A855F7" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
   );
 }
 
@@ -93,11 +57,13 @@ export default function FelixScreen({ value, onDismiss }) {
     return () => window.removeEventListener('keydown', fn);
   }, [onDismiss]);
 
+  const catSize = 172;
+
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)',
+        background: 'radial-gradient(ellipse at 50% 40%, #1E1B4B 0%, #0F172A 70%)',
         opacity: phase >= 1 ? 1 : 0,
         transition: 'opacity 0.3s ease',
       }}
@@ -109,41 +75,107 @@ export default function FelixScreen({ value, onDismiss }) {
           style={{ animation: 'heroFlash 0.35s ease-out forwards' }} />
       )}
 
-      {/* Floating paws */}
-      {phase >= 5 && PAWS.map(p => (
+      {/* Background energy glow */}
+      {phase >= 3 && (
+        <div className="absolute pointer-events-none" style={{
+          width: 500, height: 500,
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -62%)',
+          background: 'radial-gradient(circle, rgba(252,211,77,0.12) 0%, rgba(99,102,241,0.08) 40%, transparent 70%)',
+          animation: 'bgPulse 2s ease-in-out infinite',
+        }} />
+      )}
+
+      {/* Particles */}
+      {phase >= 5 && PARTICLES.map(p => (
         <div key={p.id} className="absolute pointer-events-none select-none"
           style={{
             left: `${p.left}%`, bottom: '-10px',
             fontSize: p.size,
             animation: `starRise ${p.duration}s ease-out ${p.delay}s infinite`,
-          }}>🐾</div>
+          }}>{p.icon}</div>
       ))}
 
       <div className="flex flex-col items-center gap-6 px-6" onClick={e => e.stopPropagation()}>
 
-        {/* Cat */}
-        <div
+        {/* Cat with power effects */}
+        <div className="relative flex items-center justify-center"
           style={{
             transform: phase >= 1 ? 'scale(1)' : 'scale(0)',
             transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}>
+
+          {/* Rotating energy ring */}
+          <EnergyRing visible={phase >= 3} size={catSize} />
+
+          {/* Second slower counter-rotating ring */}
+          {phase >= 3 && (
+            <div className="absolute pointer-events-none" style={{
+              top: -28,
+              left: -28,
+              width: catSize + 56,
+              height: catSize + 56,
+              animation: 'spinReverse 4s linear infinite',
+            }}>
+              <svg viewBox={`0 0 ${catSize + 56} ${catSize + 56}`} width={catSize + 56} height={catSize + 56}>
+                <circle cx={(catSize + 56) / 2} cy={(catSize + 56) / 2} r={(catSize + 56) / 2 - 4}
+                  fill="none" stroke="rgba(168,85,247,0.4)" strokeWidth="2"
+                  strokeDasharray="8 18" strokeLinecap="round" />
+              </svg>
+            </div>
+          )}
+
+          {/* Cat image */}
+          <div style={{
+            width: catSize,
+            height: catSize,
             borderRadius: '50%',
+            overflow: 'hidden',
+            border: phase >= 3 ? '4px solid #FCD34D' : '4px solid #334155',
             boxShadow: phase >= 3
-              ? '0 0 0 5px #FCD34D, 0 0 50px rgba(252,211,77,0.5)'
+              ? '0 0 0 2px #F97316, 0 0 40px rgba(252,211,77,0.6), 0 0 80px rgba(99,102,241,0.35)'
               : '0 4px 30px rgba(0,0,0,0.5)',
-            transition: 'transform 0.55s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease',
-          }}
-        >
-          <HappyTuxedoCat size={160} showCape={phase >= 3} />
+            transition: 'border 0.3s, box-shadow 0.4s',
+            animation: phase >= 3 ? 'powerGlow 1.8s ease-in-out infinite' : 'none',
+          }}>
+            <img
+              src="https://cat-avatars.vercel.app/api/cat?name=MightyFelix"
+              alt="Mighty Felix"
+              width={catSize}
+              height={catSize}
+              style={{ display: 'block', objectFit: 'cover' }}
+              draggable={false}
+            />
+          </div>
+
+          {/* Lightning bolts around cat */}
+          {phase >= 3 && ['⚡', '✨', '⚡', '✨'].map((icon, i) => (
+            <div key={i} className="absolute pointer-events-none select-none text-xl"
+              style={{
+                top: ['10%', '10%', '75%', '75%'][i],
+                left: ['10%', '75%', '10%', '75%'][i],
+                animation: `badgePop 0.4s ${i * 0.1}s ease-out both, floatBolt 2s ${i * 0.5}s ease-in-out infinite`,
+              }}>{icon}</div>
+          ))}
         </div>
 
         {/* Value + FELIX */}
         {phase >= 4 && (
           <div className="text-center" style={{ animation: 'heroTextIn 0.45s ease-out forwards' }}>
-            <div className="text-7xl font-extrabold text-white tracking-tight drop-shadow-lg leading-none mb-3">
+            <div className="font-extrabold text-white tracking-tight leading-none mb-3"
+              style={{
+                fontSize: '5rem',
+                textShadow: '0 0 30px rgba(252,211,77,0.8), 0 0 60px rgba(252,211,77,0.4)',
+              }}>
               {value}
             </div>
-            <div className="text-yellow-400 font-extrabold text-2xl tracking-widest"
-              style={{ letterSpacing: '0.2em' }}>
+            <div className="font-extrabold text-2xl tracking-widest"
+              style={{
+                letterSpacing: '0.22em',
+                background: 'linear-gradient(90deg, #FCD34D, #F97316, #A855F7)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
               F E L I X
             </div>
           </div>
@@ -158,9 +190,12 @@ export default function FelixScreen({ value, onDismiss }) {
 
         {phase >= 4 && (
           <button onClick={onDismiss}
-            className="px-8 py-3 bg-yellow-400 text-gray-900 font-bold rounded-xl text-base
-                       hover:bg-yellow-300 transition-colors shadow-lg"
-            style={{ animation: 'heroTextIn 0.45s 0.3s ease-out both' }}>
+            className="px-8 py-3 font-bold rounded-xl text-base transition-all shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #FCD34D, #F97316)',
+              color: '#1a1a1a',
+              animation: 'heroTextIn 0.45s 0.3s ease-out both',
+            }}>
             Continuer
           </button>
         )}
