@@ -55,45 +55,57 @@
            transition-shadow duration-150;
   }
 
-  /* Vote card — dark bottom-bar style */
+  /* Vote card — playing card style */
   .vote-card {
-    background: #1E293B;
-    border: 2px solid #334155;
-    border-radius: 12px;
-    width: 58px;
-    min-height: 80px;
+    background: white;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    width: 54px;
+    min-height: 78px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
+    justify-content: space-between;
+    padding: 6px 6px;
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease;
     transform-origin: bottom center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
   }
   .vote-card:hover:not(.vote-card-disabled) {
     transform: translateY(-10px);
-    border-color: #6366F1;
-    background: #263348;
+    border-color: #818CF8;
+    box-shadow: 0 8px 20px rgba(99,102,241,0.15);
   }
   .vote-card.vote-card-selected {
     transform: translateY(-12px);
     border-color: #6366F1;
-    background: #1E1B4B;
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+    background: #EEF2FF;
+    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.22);
   }
   .vote-card.vote-card-disabled {
-    opacity: 0.35;
+    opacity: 0.4;
     cursor: not-allowed;
     transform: none !important;
+    box-shadow: none;
+  }
+  .vote-card-corner {
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    align-self: flex-start;
+  }
+  .vote-card-corner.rotate-180 {
+    align-self: flex-end;
   }
 
   /* Vote bar */
   .vote-bar {
-    background: #0F172A;
-    min-height: 100px;
+    background: white;
+    border-top: 1px solid #E2E8F0;
+    min-height: 96px;
   }
 
   /* Tab */

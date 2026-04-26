@@ -1,16 +1,14 @@
-const CARD_EMOJIS = {
-  '1': '🐱', '2': '😺', '3': '😸', '5': '😻',
-  '8': '😹', '13': '😼', '21': '🙀', '?': '🐈', '☕': '😴',
-};
-
 export default function VoteCard({ value, selected, disabled, onClick }) {
   return (
     <div
       onClick={disabled ? undefined : onClick}
       className={`vote-card ${selected ? 'vote-card-selected' : ''} ${disabled ? 'vote-card-disabled' : ''}`}
     >
-      <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{CARD_EMOJIS[value] || '🐱'}</span>
-      <span className="text-lg font-extrabold leading-none text-white">{value}</span>
+      <span className={`vote-card-corner ${selected ? 'text-indigo-600' : 'text-gray-400'}`}>{value}</span>
+      <span className={`text-2xl font-extrabold leading-none ${selected ? 'text-indigo-600' : 'text-gray-800'}`}>
+        {value}
+      </span>
+      <span className={`vote-card-corner rotate-180 ${selected ? 'text-indigo-600' : 'text-gray-400'}`}>{value}</span>
     </div>
   );
 }

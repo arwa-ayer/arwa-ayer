@@ -240,11 +240,7 @@ export default function RoomPage() {
       </header>
 
       {/* ── Canvas (main playing area) ── */}
-      <main className="flex-1 overflow-y-auto relative" style={{
-        backgroundImage: 'radial-gradient(circle, #CBD5E1 1.5px, transparent 1.5px)',
-        backgroundSize: '28px 28px',
-        backgroundColor: '#F8FAFC',
-      }}>
+      <main className="flex-1 overflow-y-auto relative bg-slate-50">
         <div className="min-h-full flex flex-col items-center justify-center gap-6 p-6 py-10">
 
           {/* Admin action button */}
