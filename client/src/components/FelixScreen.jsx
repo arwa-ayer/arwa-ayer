@@ -139,7 +139,7 @@ export default function FelixScreen({ value, onDismiss }) {
             animation: phase >= 3 ? 'powerGlow 1.8s ease-in-out infinite' : 'none',
           }}>
             <img
-              src="https://cataas.com/cat/gif"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/172px-Cat_August_2010-4.jpg"
               alt="Mighty Felix"
               width={catSize}
               height={catSize}
