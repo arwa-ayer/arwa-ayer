@@ -139,11 +139,11 @@ export default function FelixScreen({ value, onDismiss }) {
             animation: phase >= 3 ? 'powerGlow 1.8s ease-in-out infinite' : 'none',
           }}>
             <img
-              src={`https://robohash.org/felix-supreme?set=set4&size=${catSize}x${catSize}&bgset=bg2`}
+              src="https://cataas.com/cat/gif"
               alt="Mighty Felix"
               width={catSize}
               height={catSize}
-              style={{ display: 'block', objectFit: 'cover' }}
+              style={{ display: 'block', objectFit: 'cover', width: catSize, height: catSize }}
               draggable={false}
             />
           </div>
