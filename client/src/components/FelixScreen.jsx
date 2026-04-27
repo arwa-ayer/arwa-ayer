@@ -139,7 +139,7 @@ export default function FelixScreen({ value, onDismiss }) {
             animation: phase >= 3 ? 'powerGlow 1.8s ease-in-out infinite' : 'none',
           }}>
             <img
-              src="https://cat-avatars.vercel.app/api/cat?name=MightyFelix"
+              src={`https://robohash.org/felix-supreme?set=set4&size=${catSize}x${catSize}&bgset=bg2`}
               alt="Mighty Felix"
               width={catSize}
               height={catSize}
