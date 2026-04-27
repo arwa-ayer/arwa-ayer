@@ -86,7 +86,8 @@ export default function RoomPage() {
       case 'UNVOTE': { s.hasVoted.delete(msg.id); delete s.pending[msg.id]; sync(); break; }
       case 'REVEAL': {
         s.revealed = true; s.votes = { ...s.pending };
-        const vals = Object.values(s.votes);
+        const nonAdminVals = Object.entries(s.votes).filter(([id]) => id !== s.adminId).map(([, v]) => v);
+        const vals = nonAdminVals.length > 0 ? nonAdminVals : Object.values(s.votes);
         const consensus = vals.length > 0 && vals.every(v => v === vals[0]);
         sync();
         if (consensus) { setConsensusValue(vals[0]); setTimeout(() => setShowFelix(true), 400); }
@@ -371,7 +372,7 @@ export default function RoomPage() {
                   <div className="text-2xl font-extrabold text-gray-900">{avg}</div>
                 </div>
               )}
-              {myVote && (
+              {myVote && !isAdmin && (
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-3 text-center">
                   <div className="text-xs text-gray-500 font-medium mb-0.5">Votre vote</div>
                   <div className="text-2xl font-extrabold text-indigo-600">{myVote}</div>
@@ -390,14 +391,16 @@ export default function RoomPage() {
       </main>
 
       {/* ── Bottom vote bar ── */}
-      <div className="vote-bar flex-shrink-0">
-        <div className="flex items-center gap-2.5 overflow-x-auto px-4 py-3 justify-center">
-          {VOTE_VALUES.map(value => (
-            <VoteCard key={value} value={value} selected={myVote === value}
-              disabled={revealed} onClick={() => handleVote(value)} />
-          ))}
+      {!isAdmin && (
+        <div className="vote-bar flex-shrink-0">
+          <div className="flex items-center gap-2.5 overflow-x-auto px-4 py-3 justify-center">
+            {VOTE_VALUES.map(value => (
+              <VoteCard key={value} value={value} selected={myVote === value}
+                disabled={revealed} onClick={() => handleVote(value)} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {showFelix && <FelixScreen value={consensusValue} onDismiss={() => setShowFelix(false)} />}
     </div>
