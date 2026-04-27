@@ -31,7 +31,9 @@ export default function HomePage() {
   function handleCreate() {
     if (!name.trim()) { setError('Entre ton prénom pour continuer.'); return; }
     setError('');
-    navigate(`/room/${generateRoomCode()}`);
+    const code = generateRoomCode();
+    localStorage.setItem(`pp_creator_${code}`, '1');
+    navigate(`/room/${code}`);
   }
 
   function handleJoin() {

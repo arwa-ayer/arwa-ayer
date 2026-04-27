@@ -27,7 +27,7 @@ export default function RoomPage() {
   const [avatarInput, setAvatarInput] = useState(MY_AVATAR);
 
   const [players, setPlayers]     = useState([]);
-  const [isAdmin, setIsAdmin]     = useState(false);
+  const [isAdmin, setIsAdmin]     = useState(() => localStorage.getItem(`pp_creator_${roomId}`) === '1');
   const [votes, setVotes]         = useState({});
   const [hasVoted, setHasVoted]   = useState(new Set());
   const [myVote, setMyVote]       = useState(null);
@@ -52,9 +52,12 @@ export default function RoomPage() {
     setPlayers(arr);
     const amAdmin = s.adminId === MY_ID;
     setIsAdmin(amAdmin);
-    if (amAdmin && s.hasVoted.has(MY_ID)) {
-      s.hasVoted.delete(MY_ID); delete s.pending[MY_ID];
+    if (amAdmin && (s.hasVoted.has(MY_ID) || s.pending[MY_ID] != null || s.votes[MY_ID] != null)) {
+      s.hasVoted.delete(MY_ID);
+      delete s.pending[MY_ID];
+      delete s.votes[MY_ID];
       pub({ type: 'UNVOTE', id: MY_ID });
+      setMyVote(null);
     }
     setRevealed(s.revealed);
     setStory(s.story);
