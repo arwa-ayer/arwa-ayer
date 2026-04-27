@@ -50,7 +50,12 @@ export default function RoomPage() {
     const arr = Object.values(s.players).sort((a, b) => a.ts - b.ts)
       .map(p => ({ ...p, isAdmin: p.id === s.adminId }));
     setPlayers(arr);
-    setIsAdmin(s.adminId === MY_ID);
+    const amAdmin = s.adminId === MY_ID;
+    setIsAdmin(amAdmin);
+    if (amAdmin && s.hasVoted.has(MY_ID)) {
+      s.hasVoted.delete(MY_ID); delete s.pending[MY_ID];
+      pub({ type: 'UNVOTE', id: MY_ID });
+    }
     setRevealed(s.revealed);
     setStory(s.story);
     if (s.revealed) { setVotes({ ...s.votes }); setMyVote(s.votes[MY_ID] ?? null); }
@@ -142,7 +147,7 @@ export default function RoomPage() {
   }, [showNamePrompt]);
 
   function handleVote(value) {
-    if (revealed) return;
+    if (revealed || isAdmin) return;
     if (myVote === value) { setMyVote(null); pub({ type: 'UNVOTE', id: MY_ID }); }
     else                  { setMyVote(value); pub({ type: 'VOTE', id: MY_ID, value }); }
   }
