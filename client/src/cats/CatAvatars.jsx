@@ -1,27 +1,38 @@
-const CAT_API = 'https://cat-avatars.vercel.app/api/cat';
+import {
+  LunaCat, MiloCat, ShadowCat, CleoCat, MaxCat, ZoeCat,
+  MysticaCat, RexCat, CozyCat,
+} from './CatSvgs';
 
 export const AVATARS = [
-  { id: 0, name: 'Luna'   },
-  { id: 1, name: 'Milo'   },
-  { id: 2, name: 'Shadow' },
-  { id: 3, name: 'Cleo'   },
-  { id: 4, name: 'Max'    },
-  { id: 5, name: 'Zoe'    },
-  { id: 6, name: 'Mochi'  },
-  { id: 7, name: 'Nori'   },
-  { id: 8, name: 'Cookie' },
+  { id: 0, name: 'Luna',   Component: LunaCat    },
+  { id: 1, name: 'Milo',   Component: MiloCat    },
+  { id: 2, name: 'Shadow', Component: ShadowCat  },
+  { id: 3, name: 'Cleo',   Component: CleoCat    },
+  { id: 4, name: 'Max',    Component: MaxCat     },
+  { id: 5, name: 'Zoe',    Component: ZoeCat     },
+  { id: 6, name: 'Mochi',  Component: CozyCat    },
+  { id: 7, name: 'Nori',   Component: MysticaCat },
+  { id: 8, name: 'Cookie', Component: RexCat     },
 ];
 
 export function CatAvatar({ id, size = 64 }) {
   const av = AVATARS[id] ?? AVATARS[0];
+  const Cat = av.Component;
   return (
-    <img
-      src={`${CAT_API}?name=${av.name}`}
-      alt={av.name}
-      width={size}
-      height={size}
-      style={{ borderRadius: '50%', display: 'block', objectFit: 'cover', flexShrink: 0 }}
-      draggable={false}
-    />
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: '#FFF8E7',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}
+    >
+      <Cat />
+    </div>
   );
 }
