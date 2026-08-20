@@ -1,0 +1,1003 @@
+<title>Le Port Felix Simba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ TOKENS ============ */
+  :root{
+    --bg:#EEF3F1;
+    --bg-deep:#E2EAE6;
+    --surface:#FFFFFF;
+    --surface-alt:#F5F9F7;
+    --ink:#122023;
+    --ink-soft:#4C6360;
+    --ink-faint:#7A908C;
+    --line:#CBD9D3;
+    --line-soft:#DEE8E3;
+    --accent:#146B5E;
+    --accent-strong:#0C4A41;
+    --accent-soft:#DCEEE9;
+    --accent-2:#C25A22;
+    --accent-2-strong:#8F3F16;
+    --accent-2-soft:#F6E3D3;
+    --code-bg:#0C1B20;
+    --code-ink:#D6ECE6;
+    --code-accent:#6FD9BE;
+    --code-accent-2:#F0A96C;
+    --code-comment:#6E8B87;
+    --shadow: 0 1px 2px rgba(10,30,26,.06), 0 8px 24px -12px rgba(10,30,26,.18);
+    --font-display:'Big Shoulders Display', 'Archivo Black', system-ui, sans-serif;
+    --font-body:'Public Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0A161A;
+      --bg-deep:#071114;
+      --surface:#101E23;
+      --surface-alt:#152A2F;
+      --ink:#E7F1EE;
+      --ink-soft:#9FBAB4;
+      --ink-faint:#6C8A85;
+      --line:#25403E;
+      --line-soft:#1B322F;
+      --accent:#5FCBB2;
+      --accent-strong:#BFF0E1;
+      --accent-soft:#173430;
+      --accent-2:#F0955A;
+      --accent-2-strong:#FBD2AC;
+      --accent-2-soft:#33241A;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0A161A;
+    --bg-deep:#071114;
+    --surface:#101E23;
+    --surface-alt:#152A2F;
+    --ink:#E7F1EE;
+    --ink-soft:#9FBAB4;
+    --ink-faint:#6C8A85;
+    --line:#25403E;
+    --line-soft:#1B322F;
+    --accent:#5FCBB2;
+    --accent-strong:#BFF0E1;
+    --accent-soft:#173430;
+    --accent-2:#F0955A;
+    --accent-2-strong:#FBD2AC;
+    --accent-2-soft:#33241A;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+
+  img,svg{max-width:100%;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+  h1,h2,h3,h4{font-family:var(--font-display); font-weight:700; letter-spacing:.01em; text-wrap:balance; margin:0;}
+  a{color:var(--accent-strong);}
+  code{font-family:var(--font-mono);}
+
+  /* ============ NAV ============ */
+  .topnav{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .topnav-inner{
+    max-width:1120px; margin:0 auto; padding:12px 24px;
+    display:flex; align-items:center; gap:20px; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-size:20px; color:var(--ink); text-decoration:none;}
+  .brand-mark{
+    width:30px; height:30px; border-radius:8px; background:var(--accent); color:var(--bg);
+    display:flex; align-items:center; justify-content:center; font-size:16px; flex:none;
+  }
+  .navlinks{display:flex; gap:4px; flex-wrap:wrap; list-style:none; margin:0; padding:0;}
+  .navlinks a{
+    font-size:13.5px; font-weight:600; text-decoration:none; color:var(--ink-soft);
+    padding:7px 11px; border-radius:7px; white-space:nowrap;
+  }
+  .navlinks a:hover{color:var(--ink); background:var(--surface-alt);}
+  @media (max-width:820px){ .navlinks{display:none;} }
+
+  /* ============ HERO ============ */
+  .hero{padding:64px 0 40px; position:relative;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--accent-strong); background:var(--accent-soft);
+    padding:6px 12px; border-radius:999px; margin-bottom:18px;
+  }
+  .hero h1{font-size:clamp(38px,6vw,64px); line-height:.98; color:var(--ink);}
+  .hero h1 em{font-style:normal; color:var(--accent);}
+  .hero p.lede{
+    font-size:18px; color:var(--ink-soft); max-width:640px; margin-top:18px;
+  }
+  .hero-meta{display:flex; gap:10px; flex-wrap:wrap; margin-top:22px;}
+  .pill{
+    font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    border:1px solid var(--line); padding:6px 12px; border-radius:999px;
+    font-family:var(--font-mono);
+  }
+
+  /* ============ SECTIONS ============ */
+  section{padding:64px 0; border-top:1px solid var(--line-soft); scroll-margin-top:76px;}
+  .section-head{max-width:680px; margin-bottom:36px;}
+  .kicker{
+    font-family:var(--font-mono); font-size:12.5px; font-weight:600; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent-2-strong); margin-bottom:10px; display:block;
+  }
+  .section-head h2{font-size:clamp(26px,3.6vw,38px); color:var(--ink);}
+  .section-head p{color:var(--ink-soft); margin-top:12px; font-size:16px;}
+
+  /* ============ CARDS / PANELS ============ */
+  .panel{
+    background:var(--surface); border:1px solid var(--line-soft); border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+  .diagram-panel{padding:22px; overflow-x:auto;}
+  .diagram-panel svg{display:block; margin:0 auto; min-width:560px;}
+  figcaption{
+    margin-top:14px; font-size:14px; color:var(--ink-soft); text-align:center;
+    padding-top:14px; border-top:1px dashed var(--line);
+  }
+  .legend{
+    display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-faint);
+    margin-top:10px; justify-content:center;
+  }
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:18px; height:2px; background:var(--ink-faint); display:inline-block;}
+  .legend i.dashed{background:none; border-top:2px dashed var(--ink-faint);}
+
+  /* ============ VOYAGE STEPS ============ */
+  .steps{display:grid; gap:14px; margin-top:28px;}
+  .step{
+    display:grid; grid-template-columns:40px 1fr; gap:16px;
+    background:var(--surface); border:1px solid var(--line-soft); border-radius:14px;
+    padding:18px 20px;
+  }
+  .step-num{
+    font-family:var(--font-display); font-size:22px; color:var(--accent);
+    background:var(--accent-soft); border-radius:10px; height:40px; width:40px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step h4{font-size:16.5px; color:var(--ink); margin-bottom:4px;}
+  .step p{margin:0; color:var(--ink-soft); font-size:14.5px;}
+  .step code{font-size:13px; background:var(--surface-alt); padding:1px 6px; border-radius:5px; color:var(--accent-strong);}
+
+  /* ============ FILE ACCORDIONS ============ */
+  .file-list{display:grid; gap:14px; margin-top:28px;}
+  details.filecard{
+    background:var(--surface); border:1px solid var(--line-soft); border-radius:14px;
+    overflow:hidden;
+  }
+  details.filecard[open]{border-color:var(--accent);}
+  details.filecard summary{
+    list-style:none; cursor:pointer; padding:18px 22px;
+    display:flex; align-items:center; gap:16px; justify-content:space-between;
+  }
+  details.filecard summary::-webkit-details-marker{display:none;}
+  .sum-left{display:flex; align-items:center; gap:14px; min-width:0;}
+  .file-badge{
+    font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--accent-strong);
+    background:var(--accent-soft); border-radius:7px; padding:4px 8px; flex:none;
+  }
+  .sum-titles{min-width:0;}
+  .sum-titles .t1{font-family:var(--font-display); font-size:19px; color:var(--ink); font-weight:700;}
+  .sum-titles .t2{font-family:var(--font-mono); font-size:12.5px; color:var(--ink-faint); margin-top:2px;}
+  .chev{
+    flex:none; width:26px; height:26px; border-radius:50%; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
+    transition:transform .18s ease;
+  }
+  details.filecard[open] .chev{transform:rotate(45deg); color:var(--accent);}
+  .filecard-body{padding:0 22px 26px; border-top:1px solid var(--line-soft); margin-top:2px;}
+  .filecard-body .lead{padding-top:18px; color:var(--ink-soft); font-size:15px;}
+  .filecard-body .lead strong{color:var(--ink);}
+
+  .callout{
+    margin-top:16px; background:var(--accent-soft); border:1px solid var(--line-soft);
+    border-left:3px solid var(--accent); border-radius:10px; padding:14px 16px;
+  }
+  .callout .ct{font-weight:700; font-size:13px; color:var(--accent-strong); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+  .callout ul{margin:0; padding-left:18px; color:var(--ink);}
+  .callout li{margin:4px 0; font-size:14.5px;}
+
+  .callout.warn{background:var(--accent-2-soft); border-left-color:var(--accent-2);}
+  .callout.warn .ct{color:var(--accent-2-strong);}
+
+  pre.code{
+    margin:16px 0 0; background:var(--code-bg); color:var(--code-ink);
+    border-radius:10px; padding:16px 18px; overflow-x:auto;
+    font-family:var(--font-mono); font-size:12.8px; line-height:1.65;
+  }
+  pre.code .c{color:var(--code-comment);}
+  pre.code .k{color:var(--code-accent);}
+  pre.code .v{color:var(--code-accent-2);}
+  .code-label{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); margin-top:14px; letter-spacing:.03em; text-transform:uppercase;}
+
+  /* comparison table */
+  table.cmp{width:100%; border-collapse:collapse; margin-top:16px; font-size:14px;}
+  table.cmp th, table.cmp td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+  table.cmp th{font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); font-weight:600;}
+  table.cmp td.k{font-weight:600; color:var(--ink); white-space:nowrap;}
+  table.cmp code{font-size:12.5px; background:var(--surface-alt); padding:1px 6px; border-radius:5px;}
+
+  /* pipeline stage strip */
+  .stagegrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:24px;}
+  .stagecard{
+    background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:14px 16px;
+  }
+  .stagecard .emoji{font-size:20px;}
+  .stagecard h5{font-family:var(--font-display); font-size:15px; color:var(--ink); margin:8px 0 4px;}
+  .stagecard p{margin:0; font-size:12.8px; color:var(--ink-soft);}
+  .stagecard .tag{
+    display:inline-block; margin-top:8px; font-family:var(--font-mono); font-size:10.5px;
+    padding:2px 7px; border-radius:6px; font-weight:600;
+  }
+  .tag.auto{background:var(--accent-soft); color:var(--accent-strong);}
+  .tag.manual{background:var(--accent-2-soft); color:var(--accent-2-strong);}
+
+  /* glossary */
+  .glossary{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:28px;}
+  .term{background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:16px 18px;}
+  .term h5{font-family:var(--font-display); font-size:16.5px; color:var(--accent-strong); margin-bottom:6px;}
+  .term p{margin:0; font-size:13.8px; color:var(--ink-soft);}
+
+  footer{padding:48px 0 64px; text-align:center;}
+  footer p{color:var(--ink-faint); font-size:13.5px; max-width:520px; margin:0 auto;}
+  .top-link{display:inline-block; margin-top:16px; font-size:13px; font-weight:600; color:var(--accent-strong); text-decoration:none;}
+
+  /* svg helpers */
+  .svg-box{fill:var(--surface-alt); stroke:var(--line);}
+  .svg-box-accent{fill:var(--accent-soft); stroke:var(--accent);}
+  .svg-box-accent2{fill:var(--accent-2-soft); stroke:var(--accent-2);}
+  .svg-text{fill:var(--ink); font-family:var(--font-body); }
+  .svg-text-soft{fill:var(--ink-soft); font-family:var(--font-body);}
+  .svg-text-mono{fill:var(--ink-soft); font-family:var(--font-mono);}
+  .svg-line{stroke:var(--ink-faint); fill:none;}
+  .svg-line-accent{stroke:var(--accent); fill:none;}
+</style>
+
+<header class="topnav">
+  <div class="topnav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">&#9875;</span>
+      Le Port Felix Simba
+    </a>
+    <ul class="navlinks">
+      <li><a href="#vue-ensemble">Vue d'ensemble</a></li>
+      <li><a href="#mecanisme-helm">Helm</a></li>
+      <li><a href="#cycle-de-vie">Cycle de vie</a></li>
+      <li><a href="#fichiers">Fichiers</a></li>
+      <li><a href="#lexique">Lexique</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" style="border-top:none; padding-top:56px;">
+    <div class="wrap">
+      <span class="eyebrow">&#9875; Guide vulgarisé &middot; Kubernetes, Helm &amp; CI/CD</span>
+      <h1>Felix Simba n'est pas<br>de la magie. C'est <em>un port.</em></h1>
+      <p class="lede">
+        Ce projet déploie deux applications (un front Angular et un back Spring Boot) sur Kubernetes,
+        avec Helm comme plan de montage et GitLab CI comme chaîne de fabrication. Pour comprendre le
+        mécanisme sans se noyer dans le YAML, on va tout comparer à un port de conteneurs&nbsp;: des
+        entrepôts, des quais, une porte d'entrée gardée, et une chaîne de fabrication qui contrôle
+        chaque conteneur avant de l'expédier.
+      </p>
+      <div class="hero-meta">
+        <span class="pill">felix-simba-back (Helm chart)</span>
+        <span class="pill">felix-simba-front (Helm chart)</span>
+        <span class="pill">nginx.conf</span>
+        <span class="pill">.gitlab-ci.yml</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VUE D'ENSEMBLE ============ -->
+  <section id="vue-ensemble">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">01 &middot; La carte du port</span>
+        <h2>Où vit chaque morceau de l'application</h2>
+        <p>
+          Un <strong>cluster Kubernetes</strong> est un port autonome&nbsp;: une zone fermée où circulent des
+          conteneurs. Une seule porte surveillée (l'<strong>Ingress</strong>) laisse entrer les visiteurs,
+          qui sont ensuite dirigés vers les bons quais (<strong>Services</strong>), où travaillent des
+          équipes (<strong>Pods</strong>) qui font tourner le vrai code.
+        </p>
+      </div>
+
+      <figure class="panel diagram-panel">
+        <svg viewBox="0 0 1040 620" role="img" aria-label="Un navigateur passe par l'Ingress qui distribue vers le Service front ou le Service back ; le Pod front (nginx) relaie ensuite en interne vers le Service back et vers le service processus existant ; le Pod back lit ses identifiants dans un Secret.">
+          <defs>
+            <marker id="arch-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g style="color:var(--ink-faint)">
+            <!-- cluster boundary -->
+            <rect x="130" y="50" width="860" height="500" rx="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 6"/>
+          </g>
+          <text x="152" y="80" class="svg-text-mono" font-size="12.5">Cluster Kubernetes &mdash; namespace app-felix-felix-sandbox</text>
+
+          <!-- browser -->
+          <g transform="translate(20,250)">
+            <rect x="0" y="0" width="66" height="46" rx="6" class="svg-box" stroke-width="1.5"/>
+            <rect x="8" y="8" width="50" height="26" rx="2" fill="none" stroke="currentColor" style="color:var(--ink-soft)"/>
+            <line x1="24" y1="46" x2="42" y2="46" style="stroke:var(--ink-soft)" stroke-width="2"/>
+            <text x="33" y="66" text-anchor="middle" class="svg-text" font-size="12.5" font-weight="600">Navigateur</text>
+          </g>
+
+          <!-- ingress -->
+          <rect x="250" y="90" width="260" height="62" rx="10" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="380" y="115" text-anchor="middle" class="svg-text" font-size="14" font-weight="700">Ingress</text>
+          <text x="380" y="134" text-anchor="middle" class="svg-text-soft" font-size="11.5">porte d'entrée du port &middot; routage par nom d'hôte</text>
+
+          <path d="M86,270 Q170,220 250,140" class="svg-line" marker-end="url(#arch-arrow)"/>
+
+          <!-- services row -->
+          <rect x="190" y="215" width="200" height="54" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="290" y="247" text-anchor="middle" class="svg-text" font-size="13" font-weight="600">Service front &middot; :80</text>
+
+          <rect x="560" y="215" width="210" height="54" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="665" y="247" text-anchor="middle" class="svg-text" font-size="13" font-weight="600">Service back &middot; :80</text>
+
+          <path d="M330,152 Q300,180 290,215" class="svg-line" marker-end="url(#arch-arrow)"/>
+          <path d="M430,152 Q560,175 655,215" class="svg-line" marker-end="url(#arch-arrow)"/>
+
+          <!-- pods row -->
+          <rect x="190" y="305" width="200" height="86" rx="8" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="290" y="338" text-anchor="middle" class="svg-text" font-size="13.5" font-weight="700">Pod front</text>
+          <text x="290" y="358" text-anchor="middle" class="svg-text-soft" font-size="11.5">nginx + build Angular</text>
+          <text x="290" y="375" text-anchor="middle" class="svg-text-soft" font-size="11.5">(sert des fichiers statiques)</text>
+
+          <rect x="560" y="305" width="210" height="86" rx="8" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="665" y="338" text-anchor="middle" class="svg-text" font-size="13.5" font-weight="700">Pod back</text>
+          <text x="665" y="358" text-anchor="middle" class="svg-text-soft" font-size="11.5">Spring Boot &middot; port 13050</text>
+          <text x="665" y="375" text-anchor="middle" class="svg-text-soft" font-size="11.5">/felix-back/actuator/health</text>
+
+          <path d="M290,269 L290,305" class="svg-line" marker-end="url(#arch-arrow)"/>
+          <path d="M665,269 L665,305" class="svg-line" marker-end="url(#arch-arrow)"/>
+
+          <!-- processus service (external, existing) -->
+          <rect x="810" y="305" width="160" height="70" rx="8" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text x="890" y="330" text-anchor="middle" class="svg-text-soft" font-size="11.5" font-weight="600">Service processus</text>
+          <text x="890" y="346" text-anchor="middle" class="svg-text-soft" font-size="11">(autre chart, déjà</text>
+          <text x="890" y="360" text-anchor="middle" class="svg-text-soft" font-size="11">en place)</text>
+
+          <!-- secret -->
+          <rect x="560" y="445" width="210" height="58" rx="8" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text x="665" y="470" text-anchor="middle" class="svg-text-soft" font-size="11.5" font-weight="600">Secret</text>
+          <text x="665" y="486" text-anchor="middle" class="svg-text-soft" font-size="11">felix-simba-back-secrets</text>
+
+          <path d="M665,445 L665,391" class="svg-line" marker-end="url(#arch-arrow)"/>
+          <text x="700" y="422" class="svg-text-soft" font-size="10.5">injecte les identifiants BDD</text>
+
+          <!-- front pod -> back service (proxy /api/back) -->
+          <path d="M392,345 Q470,290 560,235" class="svg-line-accent" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+          <text x="420" y="290" class="svg-text-soft" font-size="10.8" font-style="italic">proxy_pass /api/back/</text>
+
+          <!-- front pod -> processus service (proxy /api/processus) -->
+          <path d="M392,375 Q560,400 810,338" class="svg-line-accent" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+          <text x="480" y="405" class="svg-text-soft" font-size="10.8" font-style="italic">proxy_pass /api/processus/</text>
+        </svg>
+        <div class="legend">
+          <span><i></i> appel réseau réel</span>
+          <span><i class="dashed"></i> existe déjà / hors de ce chart</span>
+        </div>
+        <figcaption>
+          Le navigateur ne parle qu'à l'Ingress. Le Pod front (nginx) sert les fichiers Angular <em>et</em>
+          fait office d'aiguilleur&nbsp;: tout ce qui commence par <code>/api/back/</code> ou
+          <code>/api/processus/</code> est relayé en interne, sans jamais ressortir du cluster.
+        </figcaption>
+      </figure>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div><h4>Le navigateur charge l'application</h4>
+          <p>Il appelle <code>felix-simba-front.ctain-sbx.sacem.fr</code>. L'Ingress reconnaît ce nom d'hôte et envoie la requête vers le <strong>Service front</strong>.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div><h4>nginx sert la coquille Angular</h4>
+          <p>Le Pod front répond avec <code>index.html</code> et les fichiers <code>.js</code>/<code>.css</code>. Angular prend alors la main dans le navigateur.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div><h4>Angular appelle une API interne</h4>
+          <p>Il tape sur <code>/api/back/...</code>. Ce n'est pas un nouveau nom d'hôte&nbsp;: c'est le même nginx qui intercepte ce préfixe.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div><h4>nginx relaie vers le Service back</h4>
+          <p>Il réécrit l'URL (<code>/api/back/x</code> &rarr; <code>/felix-back/x</code>) et la transmet à <code>felix-simba-back-service:80</code>, en DNS interne au cluster &mdash; aucun aller-retour public.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div><h4>Le Pod back traite la demande</h4>
+          <p>Spring Boot lit ses identifiants base de données dans le <strong>Secret</strong>, et peut lui-même appeler le service &laquo;&nbsp;processus&nbsp;&raquo; pour des données de référentiel.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MECANISME HELM ============ -->
+  <section id="mecanisme-helm">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">02 &middot; Le mécanisme</span>
+        <h2>Comment Helm fabrique de vrais objets Kubernetes</h2>
+        <p>
+          Un <strong>chart Helm</strong> n'est pas un fichier YAML tout fait &mdash; c'est un <strong>gabarit</strong>.
+          Il contient des trous (<code>{{ .Values.xxx }}</code>) que Helm remplit avec les réglages du
+          moment, un peu comme un contremaître qui suit un plan et complète les blancs avec la fiche
+          de commande du jour.
+        </p>
+      </div>
+
+      <figure class="panel diagram-panel">
+        <svg viewBox="0 0 1000 460" role="img" aria-label="values.yaml, _helpers.tpl et templates/*.yaml entrent dans le moteur Helm, avec une éventuelle surcharge --set image.tag venue du pipeline CI ; le moteur produit des manifestes YAML finaux qui sont appliqués sur le cluster.">
+          <defs>
+            <marker id="helm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <rect x="30" y="30" width="230" height="72" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="145" y="58" text-anchor="middle" class="svg-text" font-size="13" font-weight="700">values.yaml</text>
+          <text x="145" y="76" text-anchor="middle" class="svg-text-soft" font-size="11">réglages&nbsp;: tag, replicas, hosts&hellip;</text>
+          <text x="145" y="91" text-anchor="middle" class="svg-text-soft" font-size="11">le carnet du bord</text>
+
+          <rect x="30" y="150" width="230" height="72" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="145" y="178" text-anchor="middle" class="svg-text" font-size="13" font-weight="700">_helpers.tpl</text>
+          <text x="145" y="196" text-anchor="middle" class="svg-text-soft" font-size="11">fonctions réutilisables&nbsp;:</text>
+          <text x="145" y="211" text-anchor="middle" class="svg-text-soft" font-size="11">name, labels, host par env&hellip;</text>
+
+          <rect x="30" y="270" width="230" height="72" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="145" y="298" text-anchor="middle" class="svg-text" font-size="13" font-weight="700">templates/*.yaml</text>
+          <text x="145" y="316" text-anchor="middle" class="svg-text-soft" font-size="11">squelettes avec des trous</text>
+          <text x="145" y="331" text-anchor="middle" class="svg-text-soft" font-size="11"><tspan font-family="var(--font-mono)">{{ .Values.xxx }}</tspan></text>
+
+          <rect x="30" y="374" width="230" height="60" rx="8" class="svg-box-accent2" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="145" y="398" text-anchor="middle" class="svg-text" font-size="12" font-weight="700">--set image.tag=1.4.2</text>
+          <text x="145" y="416" text-anchor="middle" class="svg-text-soft" font-size="10.8">surcharge envoyée par le pipeline CI</text>
+
+          <rect x="410" y="170" width="220" height="110" rx="10" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="520" y="205" text-anchor="middle" class="svg-text" font-size="14" font-weight="700">Moteur Helm</text>
+          <text x="520" y="228" text-anchor="middle" class="svg-text-soft" font-size="11.5" font-family="var(--font-mono)">helm template</text>
+          <text x="520" y="246" text-anchor="middle" class="svg-text-soft" font-size="11.5" font-family="var(--font-mono)">helm upgrade --install</text>
+          <text x="520" y="267" text-anchor="middle" class="svg-text-soft" font-size="10.5">assemble le gabarit + les réglages</text>
+
+          <path d="M260,66 Q340,90 410,190" class="svg-line" marker-end="url(#helm-arrow)"/>
+          <path d="M260,186 Q340,200 410,215" class="svg-line" marker-end="url(#helm-arrow)"/>
+          <path d="M260,306 Q340,300 410,255" class="svg-line" marker-end="url(#helm-arrow)"/>
+          <path d="M260,404 Q340,380 410,275" class="svg-line" marker-end="url(#helm-arrow)"/>
+
+          <rect x="720" y="130" width="250" height="96" rx="10" class="svg-box" stroke-width="1.5"/>
+          <text x="845" y="160" text-anchor="middle" class="svg-text" font-size="13" font-weight="700">Manifestes finaux</text>
+          <text x="845" y="180" text-anchor="middle" class="svg-text-soft" font-size="11">Deployment, Service, Ingress</text>
+          <text x="845" y="196" text-anchor="middle" class="svg-text-soft" font-size="11">&mdash; du vrai YAML, sans aucun</text>
+          <text x="845" y="211" text-anchor="middle" class="svg-text-soft" font-size="11" font-family="var(--font-mono)">{{ }}</text>
+
+          <path d="M630,220 L720,178" class="svg-line" marker-end="url(#helm-arrow)"/>
+
+          <rect x="720" y="280" width="250" height="70" rx="10" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="845" y="308" text-anchor="middle" class="svg-text" font-size="12.5" font-weight="700">Cluster Kubernetes</text>
+          <text x="845" y="328" text-anchor="middle" class="svg-text-soft" font-size="11">objets créés / mis à jour</text>
+
+          <path d="M845,226 L845,280" class="svg-line" marker-end="url(#helm-arrow)"/>
+        </svg>
+        <figcaption>
+          Le pipeline CI ne modifie jamais le chart&nbsp;: à chaque déploiement il passe juste
+          <code>--set image.tag=&lt;version&gt;</code>, la seule valeur qui change vraiment à chaque build.
+        </figcaption>
+      </figure>
+
+      <div class="callout" style="margin-top:24px;">
+        <div class="ct">&#9875; À retenir</div>
+        <ul>
+          <li><strong>Un chart = un plan réutilisable</strong>, valable pour sandbox, staging et production.</li>
+          <li><strong>values.yaml = la fiche de réglages</strong> propre à chaque déploiement (souvent surchargée en ligne de commande).</li>
+          <li><strong>_helpers.tpl = des fonctions</strong> (<code>include "felix-simba-back.name" .</code>) qui évitent de répéter la même logique dans chaque fichier.</li>
+          <li><strong>Helm ne fait qu'assembler du texte</strong> puis l'envoie à Kubernetes &mdash; toute la vraie intelligence (créer un Pod, le surveiller) vient de Kubernetes, pas de Helm.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CYCLE DE VIE ============ -->
+  <section id="cycle-de-vie">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">03 &middot; Le cycle de vie complet</span>
+        <h2>De la ligne de code au conteneur en production</h2>
+        <p>
+          <code>.gitlab-ci.yml</code> décrit une chaîne de fabrication et d'expédition. Chaque poste de
+          travail (<em>stage</em>) attend que le précédent lui passe la pièce (via <code>needs</code>), et
+          certains postes exigent qu'un humain appuie sur le bouton avant de continuer.
+        </p>
+      </div>
+
+      <figure class="panel diagram-panel">
+        <svg viewBox="0 0 1200 500" role="img" aria-label="Chaîne principale : Version, Config, Build, Tests, Tests d'intégration, Sonar, Docker. En parallèle : Tag Git et Publish snapshot. Ensuite la chaîne d'environnements : Développement (auto) puis RDSI, Intégration, Simulation, Production (tous manuels). Une voie indépendante déploie directement en Sandbox K8s via Helm.">
+          <defs>
+            <marker id="ci-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- Row A : main chain -->
+          <g font-size="12">
+          <!-- boxes: x start 10, w 148, gap 18 => step 166 -->
+          <!-- 1 Version -->
+          <rect x="10" y="40" width="148" height="64" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="84" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#127991; Version</text>
+          <text x="84" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">calcule le n&deg; de version</text>
+
+          <!-- 2 Config -->
+          <rect x="176" y="40" width="148" height="64" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="250" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#9881; Config</text>
+          <text x="250" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">prépare Maven</text>
+
+          <!-- 3 Build -->
+          <rect x="342" y="40" width="148" height="64" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="416" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#128230; Build</text>
+          <text x="416" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">compile l'application</text>
+
+          <!-- 4 Tests -->
+          <rect x="508" y="40" width="148" height="64" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="582" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#129514; Tests</text>
+          <text x="582" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">unitaires + checkstyle</text>
+
+          <!-- 5 Integration -->
+          <rect x="674" y="40" width="148" height="64" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="748" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#129514; Intégration</text>
+          <text x="748" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">Cucumber (H2 + Postgres)</text>
+
+          <!-- 6 Sonar -->
+          <rect x="840" y="40" width="148" height="64" rx="8" class="svg-box" stroke-width="1.5"/>
+          <text x="914" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#128203; Sonar</text>
+          <text x="914" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">contrôle qualité du code</text>
+
+          <!-- 7 Docker -->
+          <rect x="1006" y="40" width="184" height="64" rx="8" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="1098" y="66" text-anchor="middle" class="svg-text" font-weight="700">&#128051; Docker</text>
+          <text x="1098" y="84" text-anchor="middle" class="svg-text-soft" font-size="10.3">construit &amp; publie l'image</text>
+          </g>
+
+          <path d="M158,72 L176,72" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M324,72 L342,72" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M490,72 L508,72" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M656,72 L674,72" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M822,72 L840,72" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M988,72 L1006,72" class="svg-line" marker-end="url(#ci-arrow)"/>
+
+          <!-- Row B: tag & publish, branching from Build -->
+          <rect x="342" y="150" width="160" height="58" rx="8" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text x="422" y="174" text-anchor="middle" class="svg-text-soft" font-size="12" font-weight="600">&#127991; Tag Git</text>
+          <text x="422" y="192" text-anchor="middle" class="svg-text-soft" font-size="10.3">auto sur develop / hotfix</text>
+
+          <rect x="520" y="150" width="180" height="58" rx="8" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text x="610" y="174" text-anchor="middle" class="svg-text-soft" font-size="12" font-weight="600">&#128230; Publish snapshot</text>
+          <text x="610" y="192" text-anchor="middle" class="svg-text-soft" font-size="10.3">manuel, feature / bugfix</text>
+
+          <path d="M416,104 Q416,128 422,150" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M470,104 Q550,128 605,150" class="svg-line" marker-end="url(#ci-arrow)"/>
+
+          <!-- Row C: environments -->
+          <g font-size="12">
+          <rect x="200" y="270" width="150" height="62" rx="8" class="svg-box-accent" stroke-width="1.5"/>
+          <text x="275" y="296" text-anchor="middle" class="svg-text" font-weight="700">Développement</text>
+          <text x="275" y="313" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--accent-strong)">automatique</text>
+
+          <rect x="374" y="270" width="140" height="62" rx="8" class="svg-box-accent2" stroke-width="1.5"/>
+          <text x="444" y="296" text-anchor="middle" class="svg-text" font-weight="700">RDSI</text>
+          <text x="444" y="313" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--accent-2-strong)">manuel</text>
+
+          <rect x="538" y="270" width="150" height="62" rx="8" class="svg-box-accent2" stroke-width="1.5"/>
+          <text x="613" y="296" text-anchor="middle" class="svg-text" font-weight="700">Intégration</text>
+          <text x="613" y="313" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--accent-2-strong)">manuel</text>
+
+          <rect x="712" y="270" width="150" height="62" rx="8" class="svg-box-accent2" stroke-width="1.5"/>
+          <text x="787" y="296" text-anchor="middle" class="svg-text" font-weight="700">Simulation</text>
+          <text x="787" y="313" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--accent-2-strong)">manuel</text>
+
+          <rect x="886" y="270" width="160" height="62" rx="8" class="svg-box-accent2" stroke-width="1.5"/>
+          <text x="966" y="296" text-anchor="middle" class="svg-text" font-weight="700">Production</text>
+          <text x="966" y="313" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--accent-2-strong)">manuel</text>
+          </g>
+
+          <path d="M1098,104 Q1098,220 350,271" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M350,301 L374,301" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M514,301 L538,301" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M688,301 L712,301" class="svg-line" marker-end="url(#ci-arrow)"/>
+          <path d="M862,301 L886,301" class="svg-line" marker-end="url(#ci-arrow)"/>
+
+          <!-- Row D: sandbox lane -->
+          <rect x="374" y="400" width="340" height="62" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text x="544" y="426" text-anchor="middle" class="svg-text" font-weight="700">&#9875; Sandbox K8s (via Helm)</text>
+          <text x="544" y="444" text-anchor="middle" class="svg-text-soft" font-size="10.5">manuel, indépendant de la chaîne d'environnements ci-dessus</text>
+
+          <path d="M1098,104 Q1000,340 714,420" class="svg-line" marker-end="url(#ci-arrow)" stroke-dasharray="3 4"/>
+        </svg>
+        <div class="legend">
+          <span><i></i> enchaînement automatique</span>
+          <span><i class="dashed"></i> étape parallèle / indépendante</span>
+        </div>
+        <figcaption>
+          Seul &laquo;&nbsp;Développement&nbsp;&raquo; se déclenche tout seul sur <code>develop</code>/<code>hotfix</code>.
+          Tout le reste attend qu'un humain clique &mdash; c'est la digue de sécurité avant la production.
+        </figcaption>
+      </figure>
+
+      <div class="stagegrid">
+        <div class="stagecard"><span class="emoji">&#127991;</span><h5>Version</h5><p>Calcule le numéro de version à partir de l'historique Git.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#9881;</span><h5>Config</h5><p>Prépare l'environnement Maven pour le build.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#128230;</span><h5>Build</h5><p>Compile l'application Spring Boot.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#129514;</span><h5>Tests + Checkstyle</h5><p>Tests unitaires et vérification du style de code.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#129514;</span><h5>Tests d'intégration</h5><p>Scénarios Cucumber, sur base H2 puis Postgres.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#128203;</span><h5>Sonar</h5><p>Analyse qualité &amp; couverture de code.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#128051;</span><h5>Docker</h5><p>Construit l'image et la pousse dans le registre Artifactory.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#127991;</span><h5>Tag Git</h5><p>Marque le commit avec le numéro de version publié.</p><span class="tag auto">auto</span></div>
+        <div class="stagecard"><span class="emoji">&#128230;</span><h5>Publish snapshot</h5><p>Publie une version snapshot pour les branches feature/bugfix.</p><span class="tag manual">manuel</span></div>
+        <div class="stagecard"><span class="emoji">&#128640;</span><h5>Déploiements RDSI &rarr; Prod</h5><p>Chaque environnement récupère un secret dédié puis déploie, un à un, sur validation humaine.</p><span class="tag manual">manuel</span></div>
+        <div class="stagecard"><span class="emoji">&#9875;</span><h5>Sandbox K8s</h5><p>Voie parallèle&nbsp;: déploiement direct via <code>helm upgrade --install</code>.</p><span class="tag manual">manuel</span></div>
+      </div>
+
+      <div class="callout warn" style="margin-top:28px;">
+        <div class="ct">&#9888; Le piège des variables protégées</div>
+        <ul>
+          <li>
+            Le job &laquo;&nbsp;Deploy to Sandbox K8s&nbsp;&raquo; vérifie explicitement que
+            <code>KUBECONFIG_SANDBOX</code> n'est pas vide avant de faire quoi que ce soit.
+          </li>
+          <li>
+            Raison&nbsp;: dans GitLab, une variable CI/CD marquée <strong>&laquo;&nbsp;Protected&nbsp;&raquo;</strong>
+            n'est transmise qu'aux branches elles-mêmes protégées. Sur une branche <code>feature/*</code>
+            ou <code>hotfix/*</code> non protégée, la variable arrive vide &mdash; d'où le message d'erreur
+            explicite plutôt qu'un échec Kubernetes opaque.
+          </li>
+          <li>
+            Autre détail malin&nbsp;: le tag de l'image suit une <strong>priorité en cascade</strong> &mdash;
+            <code>OVERRIDE_IMAGE_TAG</code> s'il est fourni, sinon <code>APP_VERSION</code> calculé plus
+            haut, sinon en dernier recours le hash court du commit (<code>CI_COMMIT_SHORT_SHA</code>).
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FICHIERS ============ -->
+  <section id="fichiers">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">04 &middot; Fichier par fichier</span>
+        <h2>Ce que chaque fichier fait vraiment</h2>
+        <p>Cliquez sur un fichier pour déplier son explication, son rôle dans le port, et un extrait annoté.</p>
+      </div>
+
+      <div class="file-list">
+
+        <!-- _helpers.tpl -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">back</span>
+              <div class="sum-titles">
+                <div class="t1">Le lexique du capitaine</div>
+                <div class="t2">_helpers.tpl</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              Ce fichier ne crée <strong>aucun objet Kubernetes</strong>. Il définit des fonctions
+              (<code>define ... end</code>) réutilisées partout ailleurs, pour ne jamais écrire deux fois
+              la même règle. C'est le lexique commun que tous les autres fichiers du chart consultent.
+            </p>
+            <div class="callout">
+              <div class="ct">4 fonctions définies</div>
+              <ul>
+                <li><code>felix-simba-back.name</code> &mdash; renvoie toujours le même nom court, utilisé comme préfixe.</li>
+                <li><code>felix-simba-back.namespace</code> &mdash; utilise <code>.Values.namespace</code> s'il est renseigné, sinon retombe sur le namespace de la release Helm.</li>
+                <li><code>felix-simba-back.labels</code> / <code>selectorLabels</code> &mdash; les labels &laquo;&nbsp;complets&nbsp;&raquo; (avec la version) contre les labels &laquo;&nbsp;de sélection&nbsp;&raquo; (jamais changés, car un Service ne doit jamais perdre de vue ses Pods).</li>
+                <li><code>externalEnv</code> / <code>ingressHost</code> &mdash; piochent la bonne valeur selon <code>.Values.environment</code> (sandbox, staging, production).</li>
+              </ul>
+            </div>
+            <div class="code-label">extrait &mdash; sélection de la bonne URL selon l'environnement</div>
+            <pre class="code"><span class="c">{{/* Choisit l'URL du service processus selon l'environnement actif */}}</span>
+{{<span class="k">- define</span> "felix-simba-back.externalEnv" -}}
+{{<span class="k">- $env</span> := .Values.environment -}}
+{{<span class="k">- index</span> .Values.externalServices $env | toYaml -}}
+{{<span class="k">- end</span> -}}</pre>
+          </div>
+        </details>
+
+        <!-- values.yaml -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">back</span>
+              <div class="sum-titles">
+                <div class="t1">Le carnet de réglages</div>
+                <div class="t2">values.yaml</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              C'est la <strong>fiche de commande par défaut</strong> du conteneur&nbsp;: combien de
+              répliques, quelle image, quelles ressources, quelles routes réseau. En pratique, presque
+              tout ici peut être écrasé au moment du déploiement (<code>--set</code>).
+            </p>
+            <div class="callout">
+              <div class="ct">Trois façons différentes d'injecter des variables d'environnement</div>
+              <ul>
+                <li><code>env</code> &mdash; valeurs fixes en clair (ex&nbsp;: <code>TZ: Europe/Paris</code>).</li>
+                <li><code>externalServices.&lt;env&gt;</code> &mdash; URLs qui changent selon sandbox/staging/production.</li>
+                <li><code>secretEnv</code> &mdash; ne contient pas la valeur, juste le <strong>nom de la clé</strong> à aller lire dans le Secret Kubernetes (mot de passe base de données, origines CORS&hellip;).</li>
+              </ul>
+            </div>
+            <div class="code-label">extrait &mdash; les trois sources de variables</div>
+            <pre class="code">env:
+  SPRING_PROFILES_ACTIVE: <span class="v">"oracle"</span>
+  TZ: <span class="v">"Europe/Paris"</span>
+
+externalServices:
+  sandbox:
+    REFERENTIEL_BASE_URL: <span class="v">"http://felix-simba-processus-service...:80/felix-processus-back"</span>
+
+secretEnv:
+  SPRING_DATASOURCE_PASSWORD: spring-datasource-password  <span class="c"># = un nom de clé, pas un mot de passe</span></pre>
+            <div class="callout warn">
+              <div class="ct">Détail volontaire</div>
+              <ul><li><code>image.tag</code> est vide par défaut et <strong>obligatoire</strong> &mdash; le chart refuse de se déployer sans un tag explicite, pour ne jamais retomber accidentellement sur une vieille image.</li></ul>
+            </div>
+          </div>
+        </details>
+
+        <!-- deployment.yaml -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">back</span>
+              <div class="sum-titles">
+                <div class="t1">L'équipage du conteneur</div>
+                <div class="t2">deployment.yaml</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              Le <strong>Deployment</strong> est la consigne donnée à Kubernetes&nbsp;: &laquo;&nbsp;fais
+              toujours tourner <code>replicaCount</code> exemplaires de ce Pod, et remplace-le tout seul
+              s'il tombe&nbsp;&raquo;. C'est lui qui fusionne les trois sources d'environnement du fichier
+              précédent en une seule liste de variables réellement injectées dans le conteneur.
+            </p>
+            <div class="callout">
+              <div class="ct">Deux médecins à bord (les probes)</div>
+              <ul>
+                <li><strong>readinessProbe</strong> &mdash; &laquo;&nbsp;es-tu prêt à travailler&nbsp;?&nbsp;&raquo;. Tant que <code>/felix-back/actuator/health</code> ne répond pas, le Pod ne reçoit aucun trafic, même s'il est démarré.</li>
+                <li><strong>livenessProbe</strong> &mdash; &laquo;&nbsp;es-tu toujours vivant&nbsp;?&nbsp;&raquo;. Vérifiée en continu ; en cas d'échec répété, Kubernetes tue et relance le Pod tout seul.</li>
+              </ul>
+            </div>
+            <div class="code-label">extrait &mdash; fusion des trois sources d'environnement</div>
+            <pre class="code">env:
+  {{<span class="k">- range</span> $key, $value := .Values.env }}
+  - name: {{ $key }}
+    value: {{ $value | quote }}
+  {{<span class="k">- end</span> }}
+  {{<span class="k">- range</span> $key, $value := include "felix-simba-back.externalEnv" . | fromYaml }}
+  - name: {{ $key }}
+    value: {{ $value | quote }}
+  {{<span class="k">- end</span> }}
+  {{<span class="k">- range</span> $key, $secretKey := .Values.secretEnv }}
+  - name: {{ $key }}
+    valueFrom:
+      secretKeyRef: { name: {{ $.Values.secretName }}, key: {{ $secretKey }} }
+  {{<span class="k">- end</span> }}</pre>
+          </div>
+        </details>
+
+        <!-- service.yaml -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">back</span>
+              <div class="sum-titles">
+                <div class="t1">Le quai interne</div>
+                <div class="t2">service.yaml</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              Les Pods naissent et meurent (redéploiement, panne, mise à l'échelle) et changent d'adresse
+              à chaque fois. Le <strong>Service</strong> est le quai fixe qui ne bouge jamais&nbsp;:
+              il retrouve automatiquement les bons Pods grâce aux <code>selectorLabels</code>, et donne
+              une adresse stable (<code>felix-simba-back-service</code>) à tous ceux qui veulent leur parler.
+            </p>
+            <div class="callout">
+              <div class="ct">À retenir</div>
+              <ul>
+                <li>Type <code>ClusterIP</code> &mdash; accessible uniquement depuis l'intérieur du cluster, jamais directement depuis Internet.</li>
+                <li>Le <code>selector</code> n'utilise jamais <code>app.kubernetes.io/version</code>, précisément pour ne pas perdre le Pod de vue lors d'une mise à jour d'image.</li>
+              </ul>
+            </div>
+          </div>
+        </details>
+
+        <!-- ingress.yaml -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">back</span>
+              <div class="sum-titles">
+                <div class="t1">La porte du port</div>
+                <div class="t2">ingress.yaml</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              Seul objet du chart qui parle au monde extérieur. Il associe un <strong>nom d'hôte</strong>
+              (différent par environnement, choisi via <code>felix-simba-back.ingressHost</code>) à un
+              Service interne, et gère le certificat HTTPS si <code>tls.enabled</code> est actif.
+            </p>
+            <table class="cmp">
+              <tr><th>Environnement</th><th>Hôte public</th></tr>
+              <tr><td class="k">sandbox</td><td><code>felix-simba-back.ctain-sbx.sacem.fr</code></td></tr>
+              <tr><td class="k">staging</td><td><code>felix-simba-back.ctain-hpr.sacem.fr</code></td></tr>
+              <tr><td class="k">production</td><td><code>felix-simba-back.ctain-prd.sacem.fr</code></td></tr>
+            </table>
+            <div class="callout">
+              <div class="ct">À retenir</div>
+              <ul><li>Tout est protégé par <code>{{ if .Values.ingress.enabled }}</code>&nbsp;: on peut désactiver complètement l'accès externe sans toucher au reste du chart.</li></ul>
+            </div>
+          </div>
+        </details>
+
+        <!-- FRONT comparison -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">front</span>
+              <div class="sum-titles">
+                <div class="t1">Le chart jumeau, en plus léger</div>
+                <div class="t2">_helpers.tpl, values.yaml, deployment.yaml, service.yaml, ingress.yaml</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              Le chart <code>felix-simba-front</code> suit exactly la même logique que le back &mdash;
+              mêmes quatre types d'objets, même principe de helpers. Ce qui change reflète une différence
+              de nature&nbsp;: le front est un serveur de fichiers statiques (nginx + Angular), pas une
+              application avec état ou secrets.
+            </p>
+            <table class="cmp">
+              <tr><th></th><th>felix-simba-back</th><th>felix-simba-front</th></tr>
+              <tr><td class="k">Ressources</td><td><code>512Mi / 100m</code> &rarr; <code>1Gi / 500m</code></td><td><code>32Mi / 20m</code> &rarr; <code>128Mi / 200m</code> (bien plus léger)</td></tr>
+              <tr><td class="k">Secrets</td><td>Oui &mdash; identifiants base de données, CORS</td><td>Aucun &mdash; rien de sensible à servir des fichiers statiques</td></tr>
+              <tr><td class="k">Probes</td><td>readiness + liveness</td><td>startup + readiness + liveness (démarrage nginx surveillé de près)</td></tr>
+              <tr><td class="k">Stratégie de rollout</td><td>par défaut Kubernetes</td><td><code>RollingUpdate</code> explicite, <code>maxUnavailable: 0</code> &mdash; jamais de trou de service pendant une mise à jour</td></tr>
+              <tr><td class="k">Version dans les labels</td><td><code>.Values.image.tag</code> (change à chaque build)</td><td><code>.Chart.AppVersion</code> (fixe, versionnée dans <code>Chart.yaml</code>)</td></tr>
+              <tr><td class="k">Nom du chart</td><td>toujours <code>felix-simba-back</code></td><td><code>.Values.nameOverride</code> si présent, tronqué à 63 caractères (limite Kubernetes sur les noms)</td></tr>
+            </table>
+          </div>
+        </details>
+
+        <!-- nginx.conf -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">front</span>
+              <div class="sum-titles">
+                <div class="t1">L'aiguilleur du front</div>
+                <div class="t2">nginx.conf</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              À l'intérieur du Pod front, c'est ce fichier &mdash; pas le Deployment &mdash; qui décide où
+              va chaque requête. Quatre décisions à retenir&nbsp;:
+            </p>
+            <table class="cmp">
+              <tr><th>Requête</th><th>Comportement</th><th>Pourquoi</th></tr>
+              <tr><td class="k"><code>/healthz</code></td><td>répond <code>200 OK</code> immédiatement</td><td>c'est ce chemin que les probes Kubernetes appellent en boucle</td></tr>
+              <tr><td class="k"><code>/api/back/...</code></td><td>réécrit puis relayé vers <code>felix-simba-back-service</code></td><td>évite d'exposer le back directement au navigateur</td></tr>
+              <tr><td class="k"><code>/config.json</code></td><td><code>Cache-Control: no-store</code></td><td>ce fichier change selon l'environnement, jamais mis en cache</td></tr>
+              <tr><td class="k">JS/CSS avec hash</td><td>cache 1 an, <code>immutable</code></td><td>le nom du fichier change à chaque build, donc pas de risque de servir une vieille version</td></tr>
+              <tr><td class="k"><code>index.html</code></td><td><code>Cache-Control: no-store</code></td><td>doit toujours pointer vers les derniers fichiers hashés</td></tr>
+              <tr><td class="k">toute autre route</td><td><code>try_files</code> &rarr; <code>index.html</code></td><td>laisse le routeur Angular (single-page app) décider</td></tr>
+            </table>
+            <div class="callout warn">
+              <div class="ct">Un bug corrigé, laissé en commentaire</div>
+              <p style="margin:6px 0 0; font-size:14.5px; color:var(--ink);">
+                Le fichier contient un commentaire <code>CORRECTIF</code>&nbsp;: appeler
+                <code>/felix-simba-front/</code> (avec le slash final) déclenchait autrefois une
+                <strong>boucle de redirections 302</strong>, car la règle réécrivait l'URL vers elle-même.
+                La correction sépare explicitement le cas &laquo;&nbsp;sans slash&nbsp;&raquo; (redirection)
+                du cas &laquo;&nbsp;avec slash&nbsp;&raquo; (réécriture directe vers <code>index.html</code>).
+              </p>
+            </div>
+            <div class="code-label">extrait &mdash; le proxy vers le back</div>
+            <pre class="code">location /api/back/ {
+    rewrite ^/api/back/(.*)$ /felix-back/$1 break;
+    proxy_pass http://felix-simba-back-service:80;
+    proxy_set_header Host $host;
+    proxy_read_timeout <span class="v">120s</span>;
+}</pre>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEXIQUE ============ -->
+  <section id="lexique">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">05 &middot; Lexique du port</span>
+        <h2>Le vocabulaire, sans jargon</h2>
+      </div>
+      <div class="glossary">
+        <div class="term"><h5>Pod</h5><p>La plus petite unité qui tourne dans le cluster : un ou plusieurs conteneurs qui vivent et meurent ensemble. C'est &laquo;&nbsp;l'équipage&nbsp;&raquo; à bord.</p></div>
+        <div class="term"><h5>Deployment</h5><p>La consigne permanente qui dit combien de Pods identiques doivent exister, et les remplace automatiquement s'ils tombent.</p></div>
+        <div class="term"><h5>Service</h5><p>Une adresse réseau stable qui pointe toujours vers les bons Pods, même quand ceux-ci changent. Le quai qui ne bouge jamais.</p></div>
+        <div class="term"><h5>Ingress</h5><p>La porte d'entrée du cluster : associe un nom de domaine public à un Service interne, avec HTTPS en option.</p></div>
+        <div class="term"><h5>Namespace</h5><p>Une cloison à l'intérieur du port qui isole des groupes de ressources entre eux (ex&nbsp;: sandbox vs production).</p></div>
+        <div class="term"><h5>Secret</h5><p>Un coffre-fort Kubernetes pour les données sensibles (mots de passe, tokens), lu par les Pods au démarrage plutôt qu'écrit en clair dans le chart.</p></div>
+        <div class="term"><h5>Chart Helm</h5><p>Le plan de montage réutilisable d'une application : des gabarits YAML plus une fiche de réglages par défaut.</p></div>
+        <div class="term"><h5>Release Helm</h5><p>Une instance concrète d'un chart, déployée avec un nom donné dans un cluster donné (ex&nbsp;: <code>felix-simba-back</code> en sandbox).</p></div>
+        <div class="term"><h5>Named template</h5><p>Une fonction réutilisable définie une fois (<code>_helpers.tpl</code>) et appelée partout ailleurs avec <code>include</code>, pour éviter la répétition.</p></div>
+        <div class="term"><h5>Probe</h5><p>Un contrôle de santé automatique. &laquo;&nbsp;readiness&nbsp;&raquo; = prêt à travailler, &laquo;&nbsp;liveness&nbsp;&raquo; = toujours vivant, &laquo;&nbsp;startup&nbsp;&raquo; = a fini de démarrer.</p></div>
+        <div class="term"><h5>Tag d'image</h5><p>L'étiquette qui identifie précisément quelle version du code tourne dans le conteneur Docker &mdash; le numéro de série du conteneur.</p></div>
+        <div class="term"><h5>Pipeline CI/CD</h5><p>La chaîne automatisée d'étapes (<em>stages</em>) qui transforme du code source en application déployée, avec des contrôles à chaque poste.</p></div>
+        <div class="term"><h5>Variable protégée</h5><p>Un réglage GitLab CI marqué sensible, transmis uniquement aux branches elles-mêmes protégées &mdash; absent sur une branche <code>feature/*</code> ordinaire.</p></div>
+        <div class="term"><h5>Rolling update</h5><p>Une mise à jour progressive : les nouveaux Pods démarrent avant que les anciens ne s'arrêtent, pour zéro interruption de service.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p>
+        Ce guide vulgarise les fichiers Helm, Kubernetes, nginx et GitLab CI du projet Felix Simba.
+        C'est une simplification pédagogique&nbsp;: pour le comportement exact, la référence reste le
+        code source des charts et du pipeline.
+      </p>
+      <a class="top-link" href="#top">&uarr; Retour en haut</a>
+    </div>
+  </footer>
+
+</main>
