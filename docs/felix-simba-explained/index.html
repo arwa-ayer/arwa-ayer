@@ -522,6 +522,40 @@
           <li><strong>Helm ne fait qu'assembler du texte</strong> puis l'envoie à Kubernetes &mdash; toute la vraie intelligence (créer un Pod, le surveiller) vient de Kubernetes, pas de Helm.</li>
         </ul>
       </div>
+
+      <div class="section-head" style="margin-top:48px; max-width:100%;">
+        <span class="kicker">Pour aller plus loin</span>
+        <h3 style="font-family:var(--font-display); font-size:22px; color:var(--ink);">La boîte à outils du langage Helm</h3>
+        <p>Les fichiers du chart utilisent une poignée de fonctions du langage de template Helm (dérivé de Go). Les reconnaître permet de lire n'importe quel chart, pas seulement celui-ci.</p>
+      </div>
+      <div class="panel diagram-panel">
+        <table class="cmp">
+          <tr><th>Fonction</th><th>Utilisée ici</th><th>Ce qu'elle fait</th></tr>
+          <tr><td class="k"><code>include ... .</code></td><td><code>include "felix-simba-back.labels" .</code></td><td>Appelle un named template défini dans <code>_helpers.tpl</code> et récupère le texte qu'il produit.</td></tr>
+          <tr><td class="k"><code>nindent N</code></td><td><code>| nindent 4</code></td><td>Indente le texte reçu de N espaces avant de l'insérer &mdash; indispensable en YAML, où l'indentation a un sens.</td></tr>
+          <tr><td class="k"><code>required "message"</code></td><td><code>required "image.tag est obligatoire&hellip;" .Values.image.tag</code></td><td>Arrête le déploiement avec un message clair si la valeur est vide.</td></tr>
+          <tr><td class="k"><code>quote</code></td><td><code>{{ $value | quote }}</code></td><td>Entoure la valeur de guillemets, pour que YAML la traite toujours comme du texte (utile pour <code>"3000"</code>, qui sinon deviendrait un nombre).</td></tr>
+          <tr><td class="k"><code>toYaml</code></td><td><code>{{- toYaml .Values.resources | nindent 12 }}</code></td><td>Convertit un bloc de réglages déjà structuré directement en YAML, sans réécrire chaque champ à la main.</td></tr>
+          <tr><td class="k"><code>range ... end</code></td><td><code>{{- range $key, $value := .Values.env }}</code></td><td>Une boucle&nbsp;: répète le bloc pour chaque entrée d'une liste ou d'un dictionnaire.</td></tr>
+          <tr><td class="k"><code>if ... end</code></td><td><code>{{- if .Values.ingress.enabled }}</code></td><td>N'inclut le bloc que si la condition est vraie &mdash; permet d'activer ou de désactiver des morceaux entiers du chart.</td></tr>
+          <tr><td class="k"><code>index</code></td><td><code>index .Values.externalServices $env</code></td><td>Va chercher une valeur dans un dictionnaire par une clé calculée dynamiquement (ici, le nom de l'environnement).</td></tr>
+          <tr><td class="k"><code>trunc 63 | trimSuffix "-"</code></td><td><code>default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-"</code></td><td>Coupe le nom à 63 caractères (limite de Kubernetes) et retire un tiret qui traînerait pile à la coupe.</td></tr>
+          <tr><td class="k"><code>fromYaml</code></td><td><code>include "&hellip;externalEnv" . | fromYaml</code></td><td>Fait l'inverse de <code>toYaml</code>&nbsp;: relit du texte YAML généré pour le reparcourir avec <code>range</code>.</td></tr>
+        </table>
+      </div>
+
+      <div class="section-head" style="margin-top:40px; max-width:100%;">
+        <h3 style="font-family:var(--font-display); font-size:20px; color:var(--ink);">Les trois &laquo;&nbsp;classeurs&nbsp;&raquo; toujours disponibles</h3>
+        <p>Dans n'importe quel fichier du chart, trois objets sont automatiquement accessibles &mdash; Helm les remplit pour vous, pas besoin de les déclarer.</p>
+      </div>
+      <div class="panel diagram-panel">
+        <table class="cmp">
+          <tr><th>Objet</th><th>Exemple</th><th>D'où ça vient</th></tr>
+          <tr><td class="k"><code>.Values</code></td><td><code>.Values.replicaCount</code></td><td>Le contenu de <code>values.yaml</code>, éventuellement écrasé par <code>--set</code>.</td></tr>
+          <tr><td class="k"><code>.Release</code></td><td><code>.Release.Namespace</code>, <code>.Release.Name</code>, <code>.Release.Service</code></td><td>Des informations sur ce déploiement précis&nbsp;: où, sous quel nom, et avec quel outil (toujours <code>"Helm"</code>).</td></tr>
+          <tr><td class="k"><code>.Chart</code></td><td><code>.Chart.Name</code>, <code>.Chart.AppVersion</code></td><td>Le contenu de <code>Chart.yaml</code> &mdash; l'identité du chart lui-même (section suivante).</td></tr>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -684,6 +718,79 @@
           </li>
         </ul>
       </div>
+
+      <div class="section-head" style="margin-top:44px; max-width:100%;">
+        <span class="kicker">Pour aller plus loin</span>
+        <h3 style="font-family:var(--font-display); font-size:20px; color:var(--ink);">Ce fichier n'invente presque rien</h3>
+        <p>Toute la logique lourde &mdash; comment compiler, comment lancer Sonar, comment déployer &mdash; vit dans un <strong>autre dépôt partagé</strong>, versionné indépendamment.</p>
+      </div>
+      <div class="panel" style="padding:18px 22px;">
+        <pre class="code" style="margin-top:0;">include:
+  - project: 'dsi/repartition/felix/felixpenef-simba-pipeline'
+    ref: <span class="v">26.3.07-1202</span>
+    file:
+      - 'steps/app-build/mvn-build.yml'
+      - 'steps/docker/docker-build-mvn.yml'
+      - 'steps/deploy/deploy.yml'
+      <span class="c"># ... et le reste des étapes</span></pre>
+        <p style="margin:14px 0 0; font-size:14.5px; color:var(--ink-soft);">
+          Chaque job de ce fichier (par ex. <code>🏷️ Generate version</code>) ne fait qu'<code>extends: .version</code>
+          &mdash; il hérite d'un job générique défini dans ce dépôt partagé, épinglé à une version précise
+          (<code>ref: 26.3.07-1202</code>). Avantage&nbsp;: si le pipeline doit changer pour tous les projets
+          Felix, on met à jour un seul dépôt, pas chacun des charts. C'est pour ça qu'on ne voit ici que des
+          noms de jobs et des <code>rules</code>&nbsp;: le &laquo;&nbsp;comment&nbsp;&raquo; est ailleurs.
+        </p>
+      </div>
+
+      <div class="section-head" style="margin-top:36px; max-width:100%;">
+        <h3 style="font-family:var(--font-display); font-size:20px; color:var(--ink);"><code>needs</code> contre l'ordre des <code>stages</code></h3>
+        <p>Par défaut, GitLab attend qu'un poste entier soit terminé avant de lancer le suivant. <code>needs</code> permet de contourner cette règle.</p>
+      </div>
+      <div class="panel" style="padding:18px 22px;">
+        <pre class="code" style="margin-top:0;">🧪 Tests:
+  stage: 🧪 test
+  needs:
+    - job: 🏷️ Generate version
+      artifacts: true
+    - job: ⚙️ Initialisation maven configuration
+      artifacts: true
+    - job: 🧪 Checkstyle</pre>
+        <p style="margin:14px 0 0; font-size:14.5px; color:var(--ink-soft);">
+          <code>needs</code> dit exactement quels jobs doivent être finis <em>et</em> transmettre leurs
+          <code>artifacts</code> (les fichiers qu'ils ont produits, comme le <code>.jar</code> compilé) &mdash;
+          sans attendre que tout le <em>stage</em> précédent soit fini. C'est ce qui permet à
+          <code>🥒 Cucumber (H2)</code> et <code>🐘 Cucumber (Postgres)</code> de tourner <strong>en même
+          temps</strong> plutôt que l'un après l'autre, et de faire gagner de précieuses minutes à chaque run.
+          Le job Sonar, lui, a besoin des deux&nbsp;: il <code>needs</code> leurs rapports de couverture
+          (<code>jacoco-cucumber.exec</code>) pour calculer un seul score global.
+        </p>
+      </div>
+
+      <div class="section-head" style="margin-top:36px; max-width:100%;">
+        <h3 style="font-family:var(--font-display); font-size:20px; color:var(--ink);">Le pipeline, job par job</h3>
+      </div>
+      <div class="panel diagram-panel">
+        <table class="cmp">
+          <tr><th>Job</th><th>Se déclenche sur</th><th>Type</th></tr>
+          <tr><td class="k">🏷️ Generate version</td><td>develop, feature/*, bugfix/*, hotfix/*</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">⚙️ Config maven</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">📦 Build application</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🧪 Checkstyle</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🧪 Tests</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🥒 Cucumber (H2)</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🐘 Cucumber (Postgres)</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">📑 Sonar analysis</td><td>idem</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🐳 Build &amp; Push Docker</td><td>develop, feature/*, hotfix/*</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">📦 Publish Snapshot</td><td>feature/*, bugfix/*</td><td><span class="tag manual">manuel</span></td></tr>
+          <tr><td class="k">📑 Create git tag</td><td>develop, hotfix/*</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🔐 Get Development secrets + 🚀 Deploy to Development</td><td>develop, hotfix/*</td><td><span class="tag auto">auto</span></td></tr>
+          <tr><td class="k">🔐 Get RDSI secrets + 🚀 Deploy to RDSI</td><td>develop, hotfix/*</td><td><span class="tag manual">manuel</span></td></tr>
+          <tr><td class="k">🔐 Get Integration secrets + 🚀 Deploy to Integration</td><td>develop, hotfix/*</td><td><span class="tag manual">manuel</span></td></tr>
+          <tr><td class="k">🔐 Get Simulation secrets + 🚀 Deploy to Simulation</td><td>develop, hotfix/*</td><td><span class="tag manual">manuel</span></td></tr>
+          <tr><td class="k">🔐 Get Production secrets + 🚀 Deploy to Production</td><td>develop, hotfix/*</td><td><span class="tag manual">manuel</span></td></tr>
+          <tr><td class="k">Deploy to Sandbox K8s</td><td>develop, feature/*, hotfix/*</td><td><span class="tag manual">manuel, allow_failure</span></td></tr>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -697,6 +804,41 @@
       </div>
 
       <div class="file-list">
+
+        <!-- Chart.yaml -->
+        <details class="filecard">
+          <summary>
+            <div class="sum-left">
+              <span class="file-badge">back + front</span>
+              <div class="sum-titles">
+                <div class="t1">La carte d'identité du chart</div>
+                <div class="t2">Chart.yaml</div>
+              </div>
+            </div>
+            <span class="chev">+</span>
+          </summary>
+          <div class="filecard-body">
+            <p class="lead">
+              Le tout premier fichier que Helm lit avant tous les autres. Il ne configure rien de
+              l'application&nbsp;: il décrit le <strong>chart lui-même</strong> &mdash; son nom, sa description,
+              et deux numéros de version qu'il ne faut surtout pas confondre.
+            </p>
+            <table class="cmp">
+              <tr><th></th><th>felix-simba-back</th><th>felix-simba-front</th></tr>
+              <tr><td class="k">apiVersion</td><td colspan="2"><code>v2</code> &mdash; le format de chart utilisé par Helm&nbsp;3.</td></tr>
+              <tr><td class="k">type</td><td colspan="2"><code>application</code> &mdash; un chart déployable (par opposition à un chart &laquo;&nbsp;library&nbsp;&raquo;, fait pour être seulement importé par d'autres charts).</td></tr>
+              <tr><td class="k">version</td><td><code>0.1.0</code></td><td><code>1.0.0</code></td></tr>
+              <tr><td class="k">appVersion</td><td><code>"0.0.1"</code></td><td><code>"1.0.0"</code></td></tr>
+            </table>
+            <div class="callout warn">
+              <div class="ct">Le piège classique</div>
+              <ul>
+                <li><code>version</code> est la version <strong>du plan de montage</strong>&nbsp;: elle change quand on modifie les fichiers du chart lui-même (ajouter une probe, changer une valeur par défaut&hellip;).</li>
+                <li><code>appVersion</code> n'est qu'une <strong>étiquette informative</strong>&nbsp;: elle n'a aucun effet sur ce qui est réellement déployé. La version du code qui tourne vraiment est décidée à chaque déploiement par <code>--set image.tag=&hellip;</code> (voir &laquo;&nbsp;Le mécanisme&nbsp;&raquo; plus haut) &mdash; pas par ce fichier.</li>
+              </ul>
+            </div>
+          </div>
+        </details>
 
         <!-- _helpers.tpl -->
         <details class="filecard">
@@ -802,6 +944,13 @@ secretEnv:
               <ul>
                 <li><strong>readinessProbe</strong> &mdash; &laquo;&nbsp;es-tu prêt à travailler&nbsp;?&nbsp;&raquo;. Tant que <code>/felix-back/actuator/health</code> ne répond pas, le Pod ne reçoit aucun trafic, même s'il est démarré.</li>
                 <li><strong>livenessProbe</strong> &mdash; &laquo;&nbsp;es-tu toujours vivant&nbsp;?&nbsp;&raquo;. Vérifiée en continu ; en cas d'échec répété, Kubernetes tue et relance le Pod tout seul.</li>
+              </ul>
+            </div>
+            <div class="callout">
+              <div class="ct">Requests vs limits&nbsp;: la réservation et le plafond</div>
+              <ul>
+                <li><strong>requests</strong> (<code>512Mi</code> / <code>100m</code> CPU) &mdash; ce que Kubernetes <strong>réserve</strong> pour le Pod avant même de le démarrer&nbsp;: c'est ce chiffre qui sert à choisir sur quelle machine (nœud) le caser.</li>
+                <li><strong>limits</strong> (<code>1Gi</code> / <code>500m</code> CPU) &mdash; le <strong>plafond</strong> que le Pod ne peut pas dépasser. Trop de mémoire consommée&nbsp;: le Pod est tué (<code>OOMKilled</code>) et redémarré. Trop de CPU&nbsp;: il est simplement ralenti, jamais tué.</li>
               </ul>
             </div>
             <div class="code-label">extrait &mdash; fusion des trois sources d'environnement</div>
@@ -910,6 +1059,41 @@ secretEnv:
               <tr><td class="k">Version dans les labels</td><td><code>.Values.image.tag</code> (change à chaque build)</td><td><code>.Chart.AppVersion</code> (fixe, versionnée dans <code>Chart.yaml</code>)</td></tr>
               <tr><td class="k">Nom du chart</td><td>toujours <code>felix-simba-back</code></td><td><code>.Values.nameOverride</code> si présent, tronqué à 63 caractères (limite Kubernetes sur les noms)</td></tr>
             </table>
+
+            <div class="callout">
+              <div class="ct">Les 3 probes du front, en détail</div>
+              <table class="cmp" style="margin-top:8px;">
+                <tr><th>Probe</th><th>Démarre après</th><th>Répétée toutes les</th><th>Échecs tolérés</th></tr>
+                <tr><td class="k">startup</td><td>2s</td><td>2s</td><td>30 (donc ~60s max pour démarrer)</td></tr>
+                <tr><td class="k">readiness</td><td>2s</td><td>5s</td><td>3</td></tr>
+                <tr><td class="k">liveness</td><td>10s</td><td>10s</td><td>3</td></tr>
+              </table>
+              <p style="margin:10px 0 0; font-size:14px; color:var(--ink);">
+                Tant que la <strong>startup</strong> n'a pas réussi une fois, les deux autres probes sont mises en
+                pause &mdash; ça évite de tuer un Pod encore en train de démarrer nginx sous prétexte qu'il ne
+                répond pas encore.
+              </p>
+            </div>
+
+            <div class="callout">
+              <div class="ct">Pourquoi <code>maxUnavailable: 0</code>&nbsp;?</div>
+              <p style="margin:0; font-size:14.5px; color:var(--ink);">
+                Par défaut, Kubernetes autorise jusqu'à 25&nbsp;% des Pods indisponibles pendant une mise à jour.
+                Le front force <code>0</code>&nbsp;: aucun ancien Pod n'est arrêté avant qu'un nouveau soit prêt
+                (<code>maxSurge: 1</code> l'y autorise en dépassant temporairement le nombre de répliques prévu).
+                Résultat&nbsp;: zéro visiteur ne tombe sur une erreur pendant un déploiement.
+              </p>
+            </div>
+
+            <div class="code-label">extrait &mdash; comment le nom est calculé (front)</div>
+            <pre class="code">{{<span class="k">- define</span> "felix-simba-front.name" -}}
+{{<span class="k">- default</span> .Chart.Name .Values.nameOverride | trunc <span class="v">63</span> | trimSuffix "-" }}
+{{<span class="k">- end</span> }}</pre>
+            <p style="font-size:13.5px; color:var(--ink-faint); margin-top:8px;">
+              À lire de droite à gauche&nbsp;: on prend <code>nameOverride</code> s'il existe, sinon
+              <code>Chart.Name</code> (<code>"felix-simba-front"</code>), on coupe à 63 caractères, puis on
+              retire un &laquo;&nbsp;-&nbsp;&raquo; qui traînerait pile à la coupure.
+            </p>
           </div>
         </details>
 
@@ -956,6 +1140,28 @@ secretEnv:
     proxy_set_header Host $host;
     proxy_read_timeout <span class="v">120s</span>;
 }</pre>
+            <p style="font-size:14.5px; color:var(--ink-soft); margin:14px 0 0;">
+              Le back vit toujours à l'intérieur du cluster, derrière ce proxy. Sans les trois en-têtes
+              ci-dessus, il ne verrait jamais l'adresse ni le protocole du vrai visiteur &mdash; seulement
+              ceux de nginx.
+            </p>
+            <table class="cmp">
+              <tr><th>En-tête envoyé</th><th>Ce qu'il transporte</th></tr>
+              <tr><td class="k"><code>Host</code></td><td>Le nom de domaine que le visiteur a tapé, préservé tel quel.</td></tr>
+              <tr><td class="k"><code>X-Real-IP</code></td><td>L'adresse IP réelle du visiteur.</td></tr>
+              <tr><td class="k"><code>X-Forwarded-For</code></td><td>La chaîne des relais traversés, IP par IP.</td></tr>
+              <tr><td class="k"><code>X-Forwarded-Proto</code></td><td>Le protocole d'origine (<code>https</code>), même si le trajet interne se fait en clair.</td></tr>
+            </table>
+            <div class="callout">
+              <div class="ct">D'où vient <code>${PORT}</code>&nbsp;?</div>
+              <p style="margin:0; font-size:14.5px; color:var(--ink);">
+                La toute première ligne du fichier, <code>listen ${PORT};</code>, n'est pas du nginx valide tel
+                quel &mdash; c'est un espace réservé. Au démarrage du conteneur, un mécanisme de substitution
+                remplace <code>${PORT}</code> par la vraie valeur de la variable d'environnement <code>PORT</code>
+                (définie à <code>"3000"</code> dans <code>values.yaml</code>) avant que nginx ne lise sa
+                configuration &mdash; ce qui permet de changer le port d'écoute sans modifier ce fichier.
+              </p>
+            </div>
           </div>
         </details>
 
