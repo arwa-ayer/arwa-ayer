@@ -1,0 +1,336 @@
+<title>Felix Simba ABC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#F3F7FB; --surface:#FFFFFF; --surface-alt:#EAF2FA;
+    --ink:#132539; --ink-soft:#4E6377; --ink-faint:#7C93A6; --line:#D7E4EF;
+    --accent:#2870C9; --accent-strong:#154D96; --accent-soft:#DCEAFB;
+    --accent-2:#F0932B; --accent-2-strong:#B85E10; --accent-2-soft:#FCE7D0;
+    --shadow: 0 2px 4px rgba(19,37,57,.05), 0 14px 30px -16px rgba(19,37,57,.22);
+    --font-display:'Baloo 2', 'Segoe UI Rounded', system-ui, sans-serif;
+    --font-body:'Nunito Sans', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1620; --surface:#16202C; --surface-alt:#1C2836; --ink:#EAF1F8; --ink-soft:#9FB4C7;
+      --ink-faint:#6C8398; --line:#28394A; --accent:#6FA8F0; --accent-strong:#C4E0FF; --accent-soft:#1B2E44;
+      --accent-2:#F5A855; --accent-2-strong:#FBD5A0; --accent-2-soft:#3A2A16;
+      --shadow: 0 2px 4px rgba(0,0,0,.3), 0 16px 34px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1620; --surface:#16202C; --surface-alt:#1C2836; --ink:#EAF1F8; --ink-soft:#9FB4C7;
+    --ink-faint:#6C8398; --line:#28394A; --accent:#6FA8F0; --accent-strong:#C4E0FF; --accent-soft:#1B2E44;
+    --accent-2:#F5A855; --accent-2-strong:#FBD5A0; --accent-2-soft:#3A2A16;
+    --shadow: 0 2px 4px rgba(0,0,0,.3), 0 16px 34px -16px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:18px; line-height:1.65;}
+  .wrap{max-width:640px; margin:0 auto; padding:0 22px;}
+  h1,h2,h3{font-family:var(--font-display); font-weight:700; margin:0; text-wrap:balance;}
+  img,svg{max-width:100%;}
+
+  header.top{padding:20px 0; text-align:center;}
+  header.top .mark{font-size:26px;}
+  header.top .name{font-family:var(--font-display); font-size:18px; font-weight:700; margin-left:8px;}
+
+  .hero{text-align:center; padding:24px 0 8px;}
+  .hero h1{font-size:clamp(30px,7vw,44px); line-height:1.08;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{font-size:18px; color:var(--ink-soft); margin:16px auto 0; max-width:480px;}
+  .hero .promise{
+    margin:28px auto 0; max-width:460px; background:var(--accent-soft); border-radius:16px;
+    padding:16px 20px; font-size:15px; color:var(--accent-strong); font-weight:700;
+  }
+
+  /* ---- chapter intro ---- */
+  .chapter-intro{text-align:center; padding:56px 0 8px;}
+  .chapter-intro .num{
+    display:inline-flex; width:40px; height:40px; border-radius:50%; background:var(--accent-2);
+    color:#fff; align-items:center; justify-content:center; font-family:var(--font-display); font-size:18px;
+    margin-bottom:14px;
+  }
+  .chapter-intro h2{font-size:24px;}
+  .chapter-intro p{color:var(--ink-soft); font-size:15.5px; margin-top:8px;}
+
+  /* ---- vertical story flow ---- */
+  .story{position:relative; padding:18px 0 8px;}
+  .story::before{
+    content:""; position:absolute; left:35px; top:0; bottom:0; width:3px;
+    background:var(--line); border-radius:3px;
+  }
+  @media (max-width:560px){ .story::before{left:27px;} }
+
+  .beat{position:relative; padding:28px 0 28px 90px; min-height:1px;}
+  @media (max-width:560px){ .beat{padding-left:66px;} }
+  .beat .step-dot{
+    position:absolute; left:14px; top:28px; width:44px; height:44px; border-radius:50%;
+    background:var(--surface); border:3px solid var(--accent); display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:17px; color:var(--accent-strong); box-shadow:var(--shadow);
+  }
+  @media (max-width:560px){ .beat .step-dot{left:6px; width:36px; height:36px; font-size:14px;} }
+
+  .beat-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:22px 24px;
+    box-shadow:var(--shadow);
+  }
+  .beat-ic{font-size:34px; line-height:1;}
+  .beat-card h3{font-size:19px; margin:12px 0 8px; color:var(--ink);}
+  .beat-card p{margin:0; font-size:15.5px; color:var(--ink-soft);}
+  .beat-chip{
+    display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+    background:var(--accent-2-soft); color:var(--accent-2-strong); font-weight:800;
+    font-size:12.5px; padding:6px 12px; border-radius:999px;
+  }
+  .beat-chip b{font-family:var(--font-mono); font-weight:700;}
+
+  /* ---- recap ---- */
+  .recap{padding:56px 0 40px; text-align:center;}
+  .recap h2{font-size:clamp(24px,5vw,32px);}
+  .recap p{color:var(--ink-soft); font-size:16px; margin:14px auto 0; max-width:480px;}
+  .recap-art{margin:30px auto 0; max-width:560px;}
+  .recap-art .panel{background:var(--surface); border:1px solid var(--line); border-radius:22px; box-shadow:var(--shadow); padding:12px;}
+
+  footer{padding:36px 0 60px; text-align:center;}
+  footer p{color:var(--ink-faint); font-size:13.5px;}
+</style>
+
+<header class="top">
+  <span class="mark">&#128099;</span><span class="name">Felix Simba ABC</span>
+</header>
+
+<main>
+  <div class="hero wrap">
+    <h1>On repart de <span>zéro</span>,<br>une idée à la fois</h1>
+    <p>Pas de mots compliqués sans explication d'abord. Chaque brique, une par une, avec une image.</p>
+    <div class="promise">&#11015;&#65039; Lis dans l'ordre. Chaque idée s'appuie sur la précédente.</div>
+  </div>
+
+  <!-- CHAPITRE 1 -->
+  <div class="chapter-intro wrap">
+    <div class="num">1</div>
+    <h2>Les briques de base</h2>
+    <p>Avant de parler du site en question, comprenons c'est quoi, "faire tourner un programme".</p>
+  </div>
+
+  <div class="story wrap">
+    <div class="beat">
+      <div class="step-dot">1</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128241;</div>
+        <h3>Une appli, c'est un programme qui vit ailleurs</h3>
+        <p>Un site pour acheter des chaussures, une appli de messages&hellip; ce que tu vois sur ton écran est fabriqué par un programme qui tourne sur un ordinateur, loin de toi.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>une application</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">2</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128230;</div>
+        <h3>On range ce programme dans une boîte</h3>
+        <p>Comme un repas tout préparé dans une boîte&nbsp;: on met dedans absolument tout ce qu'il faut pour que le programme marche, pour ne jamais avoir de mauvaise surprise en l'ouvrant ailleurs.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>un conteneur</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">3</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#9875;</div>
+        <h3>Toutes ces boîtes vivent dans un grand port</h3>
+        <p>Un port, c'est un grand terrain qui range plein de boîtes, les allume, les surveille jour et nuit, et en remplace une tout de suite si elle tombe en panne.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>Kubernetes</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">4</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128737;&#65039;</div>
+        <h3>Une boîte allumée porte un nom</h3>
+        <p>Dès qu'une boîte tourne dans le port, on lui donne un nom précis. C'est une copie du programme, bien vivante, prête à travailler.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>un Pod</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">5</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128101;</div>
+        <h3>Pourquoi garder plusieurs copies&nbsp;?</h3>
+        <p>S'il n'y avait qu'une seule copie et qu'elle tombait en panne, plus personne ne pourrait utiliser l'appli. Alors le port en garde toujours plusieurs, prêtes en même temps.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>des réplicas</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPITRE 2 -->
+  <div class="chapter-intro wrap">
+    <div class="num">2</div>
+    <h2>Comment on te trouve</h2>
+    <p>Les boîtes bougent, changent, se remplacent. Comment un visiteur arrive quand même au bon endroit&nbsp;?</p>
+  </div>
+
+  <div class="story wrap">
+    <div class="beat">
+      <div class="step-dot">6</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128682;</div>
+        <h3>Un panneau qui ne bouge jamais</h3>
+        <p>Les copies changent tout le temps de place à l'intérieur du port. Alors il existe un panneau fixe, avec une seule adresse, qui sait toujours où elles sont en ce moment.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>un Service</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">7</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128274;</div>
+        <h3>Une seule porte surveillée</h3>
+        <p>Pour entrer dans le port depuis l'extérieur (depuis internet), il n'y a qu'une seule porte. Elle vérifie l'adresse demandée et t'envoie vers le bon panneau.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>un Ingress</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">8</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128188;</div>
+        <h3>Un coffre pour les secrets</h3>
+        <p>Les mots de passe (par exemple, pour ouvrir la base de données) ne sont jamais écrits en clair dans les boîtes. Ils dorment dans un petit coffre-fort à part, que seul le programme peut ouvrir.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>un Secret</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">9</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#127968;&#65039;&#127981;</div>
+        <h3>Deux métiers, dans deux maisons différentes</h3>
+        <p>La maison &laquo;&nbsp;front&nbsp;&raquo; est la vitrine que tu vois et que tu touches. L'usine &laquo;&nbsp;back&nbsp;&raquo; est la cuisine, en coulisses, qui prépare vraiment les choses que tu ne vois pas.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>front &amp; back</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPITRE 3 -->
+  <div class="chapter-intro wrap">
+    <div class="num">3</div>
+    <h2>La recette qu'on réutilise</h2>
+    <p>Construire une boîte, un panneau et une porte à la main, à chaque fois, ce serait trop long. Alors&hellip;</p>
+  </div>
+
+  <div class="story wrap">
+    <div class="beat">
+      <div class="step-dot">10</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128214;</div>
+        <h3>Un même plan, réutilisé à chaque fois</h3>
+        <p>Pour construire un Pod, un Service et un Ingress, on utilise toujours le même plan de montage &mdash; comme une recette de cuisine qu'on ressort à chaque fois, juste avec des ingrédients qui changent un peu.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>un chart Helm</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">11</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#128203;</div>
+        <h3>La liste des réglages du jour</h3>
+        <p>Combien de copies allumer, quelle adresse utiliser, quel mot de passe aller chercher&hellip; tout est écrit dans une seule liste, qui change selon qu'on est en train de tester ou vraiment en ligne pour de vrai.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>values.yaml</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPITRE 4 -->
+  <div class="chapter-intro wrap">
+    <div class="num">4</div>
+    <h2>Comment une nouveauté arrive toute seule</h2>
+    <p>Quelqu'un change le programme. Comment ça finit dans le port, tout seul, sans effort&nbsp;?</p>
+  </div>
+
+  <div class="story wrap">
+    <div class="beat">
+      <div class="step-dot">12</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#127981;</div>
+        <h3>Une chaîne d'usine automatique</h3>
+        <p>Dès que quelqu'un change le programme, une chaîne se met en marche toute seule&nbsp;: elle vérifie que rien n'est cassé, elle emballe une nouvelle boîte, puis elle la livre dans le port.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>le pipeline CI/CD</b></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="step-dot">13</div>
+      <div class="beat-card">
+        <div class="beat-ic">&#129504;</div>
+        <h3>Le réceptionniste de la maison front</h3>
+        <p>Quand tu arrives sur le site, quelqu'un regarde ce que tu demandes et décide tout seul&nbsp;: &laquo;&nbsp;je te montre une page&nbsp;&raquo;, ou &laquo;&nbsp;j'appelle la cuisine (le back) pour toi&nbsp;&raquo;.</p>
+        <div class="beat-chip">&#128172; en vrai, ça s'appelle&nbsp;: <b>nginx</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECAP -->
+  <div class="recap wrap">
+    <h2>&#127881; Tu connais maintenant toutes les briques</h2>
+    <p>Relis ce dessin&nbsp;: chaque mot que tu viens d'apprendre y a sa place.</p>
+    <div class="recap-art">
+      <div class="panel">
+        <svg viewBox="0 0 820 300" role="img" aria-label="Un port dessiné simplement : un bateau chargé de boîtes de conteneurs navigue vers un quai avec une tour de contrôle (la porte d'entrée, l'Ingress) et deux petites maisons, l'une pour le front et l'une pour le back.">
+          <defs>
+            <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--accent-soft)"/>
+              <stop offset="1" stop-color="var(--surface)"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="820" height="300" rx="16" fill="url(#sky2)"/>
+          <circle cx="700" cy="60" r="30" fill="var(--accent-2-soft)" stroke="var(--accent-2)" stroke-width="2.5"/>
+
+          <path d="M0,220 Q60,208 120,220 T240,220 T360,220 T480,220 T600,220 T720,220 T820,220 L820,300 L0,300 Z" fill="var(--accent-soft)"/>
+          <path d="M0,220 Q60,208 120,220 T240,220 T360,220 T480,220 T600,220 T720,220 T820,220" fill="none" stroke="var(--accent)" stroke-width="2.5" opacity=".6"/>
+
+          <g transform="translate(60,150)">
+            <path d="M0,60 L20,90 L150,90 L170,60 Z" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="2.5"/>
+            <rect x="18" y="18" width="30" height="42" rx="4" fill="var(--accent-2-soft)" stroke="var(--accent-2)" stroke-width="2.5"/>
+            <rect x="56" y="6" width="30" height="54" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>
+            <rect x="94" y="22" width="30" height="38" rx="4" fill="var(--accent-2-soft)" stroke="var(--accent-2)" stroke-width="2.5"/>
+          </g>
+          <text x="130" y="270" text-anchor="middle" font-family="var(--font-display)" font-size="13" fill="var(--ink-soft)">des boîtes (conteneurs)</text>
+
+          <g transform="translate(430,90)">
+            <rect x="0" y="60" width="26" height="80" rx="4" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="2.5"/>
+            <rect x="-10" y="30" width="46" height="34" rx="6" fill="var(--accent)" opacity=".92"/>
+            <circle cx="13" cy="47" r="9" fill="var(--surface)"/>
+            <text x="13" y="51" text-anchor="middle" font-size="12" fill="var(--accent)" font-weight="800">&#128274;</text>
+          </g>
+          <text x="443" y="200" text-anchor="middle" font-family="var(--font-display)" font-size="13" fill="var(--ink-soft)">la porte (Ingress)</text>
+
+          <g transform="translate(560,110)">
+            <rect x="0" y="30" width="90" height="60" rx="8" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+            <path d="M-8,30 L45,0 L98,30 Z" fill="var(--accent)"/>
+            <rect x="34" y="55" width="22" height="35" rx="3" fill="var(--accent-soft)"/>
+          </g>
+          <text x="605" y="220" text-anchor="middle" font-family="var(--font-display)" font-size="13" fill="var(--ink-soft)">front</text>
+
+          <g transform="translate(680,110)">
+            <rect x="0" y="30" width="90" height="60" rx="8" fill="var(--surface)" stroke="var(--accent-2)" stroke-width="2.5"/>
+            <path d="M-8,30 L45,0 L98,30 Z" fill="var(--accent-2)"/>
+            <rect x="34" y="55" width="22" height="35" rx="3" fill="var(--accent-2-soft)"/>
+          </g>
+          <text x="725" y="220" text-anchor="middle" font-family="var(--font-display)" font-size="13" fill="var(--ink-soft)">back</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <footer class="wrap">
+    <p>Version &laquo;&nbsp;zéro connaissance&nbsp;&raquo; du guide Felix Simba.</p>
+  </footer>
+</main>
