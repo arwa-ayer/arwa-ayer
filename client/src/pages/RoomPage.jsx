@@ -48,7 +48,7 @@ export default function RoomPage() {
   const sync = useCallback(() => {
     const s = sRef.current;
     const arr = Object.values(s.players).sort((a, b) => a.ts - b.ts)
-      .map(p => ({ ...p, isAdmin: p.id === s.adminId }));
+      .map(p => ({ ...p, name: (p.name || '').trim() || 'Anonyme', isAdmin: p.id === s.adminId }));
     setPlayers(arr);
     const amAdmin = s.adminId === MY_ID;
     setIsAdmin(amAdmin);
@@ -77,8 +77,10 @@ export default function RoomPage() {
     const s = sRef.current;
     switch (msg.type) {
       case 'JOIN': {
+        const cleanName = (msg.name || '').trim();
+        if (!cleanName) break; // ignore ghosts
         if (!s.players[msg.id]) {
-          s.players[msg.id] = { id: msg.id, name: msg.name, ts: msg.ts, avatarId: msg.avatarId ?? 0 };
+          s.players[msg.id] = { id: msg.id, name: cleanName, ts: msg.ts, avatarId: msg.avatarId ?? 0 };
           s.adminId = getAdminId(s.players);
           if (s.adminId === MY_ID && msg.id !== MY_ID)
             setTimeout(() => pub({ type: 'STATE_SYNC', targetId: msg.id, state: shareableState() }), 300);
@@ -143,7 +145,12 @@ export default function RoomPage() {
   }
 
   useEffect(() => {
-    if (!showNamePrompt) start(playerName, MY_AVATAR);
+    if (!showNamePrompt) {
+      const freshName = (localStorage.getItem('playerName') || '').trim();
+      if (!freshName) { setShowNamePrompt(true); return; }
+      const freshAvatar = parseInt(localStorage.getItem('pp_avatar') || '0');
+      start(freshName, freshAvatar);
+    }
     return () => {
       if (pnRef.current) { pub({ type: 'LEAVE', id: MY_ID }); pnRef.current.unsubscribeAll(); pnRef.current.destroy?.(); pnRef.current = null; }
     };
