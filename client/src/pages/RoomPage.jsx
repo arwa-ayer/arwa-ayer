@@ -82,15 +82,28 @@ export default function RoomPage() {
         if (!s.players[msg.id]) {
           s.players[msg.id] = { id: msg.id, name: cleanName, ts: msg.ts, avatarId: msg.avatarId ?? 0 };
           s.adminId = getAdminId(s.players);
-          if (s.adminId === MY_ID && msg.id !== MY_ID)
+          if (s.adminId === MY_ID && msg.id !== MY_ID) {
+            // Full state to the newcomer, and roster broadcast so existing peers catch up
             setTimeout(() => pub({ type: 'STATE_SYNC', targetId: msg.id, state: shareableState() }), 300);
+            setTimeout(() => pub({ type: 'ROSTER_SYNC', players: { ...s.players } }), 350);
+          }
         }
         sync(); break;
       }
       case 'LEAVE': {
         delete s.players[msg.id]; s.hasVoted.delete(msg.id); delete s.pending[msg.id];
         if (s.revealed) delete s.votes[msg.id];
-        s.adminId = getAdminId(s.players); sync(); break;
+        s.adminId = getAdminId(s.players);
+        if (s.adminId === MY_ID)
+          setTimeout(() => pub({ type: 'ROSTER_SYNC', players: { ...s.players } }), 150);
+        sync(); break;
+      }
+      case 'ROSTER_SYNC': {
+        for (const [id, p] of Object.entries(msg.players || {})) {
+          if (!s.players[id] && (p.name || '').trim()) s.players[id] = p;
+        }
+        s.adminId = getAdminId(s.players);
+        sync(); break;
       }
       case 'VOTE':   { s.hasVoted.add(msg.id); s.pending[msg.id] = msg.value; sync(); break; }
       case 'UNVOTE': { s.hasVoted.delete(msg.id); delete s.pending[msg.id]; sync(); break; }
@@ -155,6 +168,16 @@ export default function RoomPage() {
       if (pnRef.current) { pub({ type: 'LEAVE', id: MY_ID }); pnRef.current.unsubscribeAll(); pnRef.current.destroy?.(); pnRef.current = null; }
     };
   }, [showNamePrompt]);
+
+  // Admin periodically re-broadcasts the roster so clients that missed a JOIN catch up
+  useEffect(() => {
+    if (!isAdmin) return;
+    const id = setInterval(() => {
+      const s = sRef.current;
+      pub({ type: 'ROSTER_SYNC', players: { ...s.players } });
+    }, 15000);
+    return () => clearInterval(id);
+  }, [isAdmin]);
 
   function handleVote(value) {
     if (revealed || isAdmin) return;
