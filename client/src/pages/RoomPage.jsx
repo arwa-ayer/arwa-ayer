@@ -22,8 +22,10 @@ export default function RoomPage() {
   const channel = getChannel(roomId);
 
   const [playerName] = useState(() => localStorage.getItem('playerName') || '');
-  const [showNamePrompt, setShowNamePrompt] = useState(!localStorage.getItem('playerName'));
-  const [nameInput, setNameInput] = useState('');
+  // Prompt is shown unless this specific room was already joined in this tab's session
+  const [showNamePrompt, setShowNamePrompt] = useState(() => !sessionStorage.getItem(`pp_joined_${roomId}`));
+  // Pre-fill with the last used name, but the user has to confirm (or change) it per room
+  const [nameInput, setNameInput] = useState(() => localStorage.getItem('playerName') || '');
   const [avatarInput, setAvatarInput] = useState(MY_AVATAR);
 
   const [players, setPlayers]     = useState([]);
@@ -200,6 +202,7 @@ export default function RoomPage() {
     const n = nameInput.trim(); if (!n) return;
     localStorage.setItem('playerName', n);
     localStorage.setItem('pp_avatar', String(avatarInput));
+    sessionStorage.setItem(`pp_joined_${roomId}`, '1');
     setShowNamePrompt(false);
   }
 

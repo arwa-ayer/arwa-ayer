@@ -33,6 +33,7 @@ export default function HomePage() {
     setError('');
     const code = generateRoomCode();
     localStorage.setItem(`pp_creator_${code}`, '1');
+    sessionStorage.setItem(`pp_joined_${code}`, '1');
     navigate(`/room/${code}`);
   }
 
