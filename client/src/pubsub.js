@@ -1,10 +1,13 @@
 import PubNub from 'pubnub';
 
 export function getPlayerId() {
-  let id = localStorage.getItem('pp_player_id');
+  // sessionStorage so each browser tab has its own identity (localStorage was
+  // shared across tabs → two tabs in the same browser collided on the same id
+  // and only ever saw themselves in the room)
+  let id = sessionStorage.getItem('pp_player_id');
   if (!id) {
     id = 'p' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-    localStorage.setItem('pp_player_id', id);
+    sessionStorage.setItem('pp_player_id', id);
   }
   return id;
 }
