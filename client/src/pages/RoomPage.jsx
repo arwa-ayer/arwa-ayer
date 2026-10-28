@@ -153,7 +153,12 @@ export default function RoomPage() {
           setTimeout(() => pub({ type: 'STATE_REQUEST', id: MY_ID }), 600);
         }
         if (['PNNetworkIssuesCategory', 'PNNetworkDownCategory'].includes(category)) setConnected(false);
-        if (category === 'PNNetworkUpCategory') setConnected(true);
+        if (category === 'PNNetworkUpCategory' || category === 'PNReconnectedCategory') {
+          setConnected(true);
+          // Re-announce ourselves so the admin re-adds us if we were pruned during the drop
+          const me = sRef.current.players[MY_ID];
+          if (me) pub({ type: 'JOIN', id: MY_ID, name: me.name, ts: me.ts, avatarId: me.avatarId });
+        }
       },
     });
     pn.subscribe({ channels: [channel], withPresence: true });
@@ -172,37 +177,46 @@ export default function RoomPage() {
   }, [showNamePrompt]);
 
   // Admin: re-broadcast roster + reconcile against PubNub's real subscriber list.
-  // hereNow() returns everyone actually subscribed to the channel; any player in
-  // our state whose id isn't in that list is a ghost (closed tab, dead network)
-  // and gets evicted. Covers the case where a client never got to publish LEAVE.
+  // Ghosts (closed tabs, dead networks) are evicted ONLY after being absent
+  // from hereNow() twice in a row (~30s) so a transient hereNow() miss, a
+  // short network blip, or a race with a brand-new joiner never kicks a real
+  // participant. If their connection comes back, they re-announce themselves
+  // via PNReconnectedCategory and are added back immediately.
+  const missesRef = useRef({});
   useEffect(() => {
     if (!isAdmin) return;
+    missesRef.current = {};
     const reconcile = async () => {
       const s = sRef.current;
       try {
         const res = await pnRef.current?.hereNow({ channels: [channel] });
         const occupants = res?.channels?.[channel]?.occupants || [];
         const live = new Set(occupants.map(o => o.uuid));
-        if (live.size > 0) {
-          let changed = false;
-          for (const id of Object.keys(s.players)) {
-            if (id !== MY_ID && !live.has(id)) {
-              delete s.players[id];
-              s.hasVoted.delete(id);
-              delete s.pending[id];
-              if (s.revealed) delete s.votes[id];
-              changed = true;
-            }
+        if (live.size === 0) {
+          // hereNow returned nothing — probably a transient PubNub error, bail out
+          pub({ type: 'ROSTER_SYNC', players: { ...s.players } });
+          return;
+        }
+        let changed = false;
+        for (const id of Object.keys(s.players)) {
+          if (id === MY_ID) continue;
+          if (live.has(id)) {
+            delete missesRef.current[id]; // seen → reset
+            continue;
           }
-          if (changed) {
-            pub({ type: 'ROSTER_SYNC', players: { ...s.players } });
-            // Also publish an explicit LEAVE for each evicted ghost so other
-            // clients that missed the roster broadcast still drop them
-            sync();
+          missesRef.current[id] = (missesRef.current[id] || 0) + 1;
+          if (missesRef.current[id] >= 2) {
+            delete s.players[id];
+            s.hasVoted.delete(id);
+            delete s.pending[id];
+            if (s.revealed) delete s.votes[id];
+            delete missesRef.current[id];
+            changed = true;
           }
         }
+        if (changed) sync();
       } catch {}
-      pub({ type: 'ROSTER_SYNC', players: { ...s.players } });
+      pub({ type: 'ROSTER_SYNC', players: { ...sRef.current.players } });
     };
     reconcile();
     const id = setInterval(reconcile, 15000);
