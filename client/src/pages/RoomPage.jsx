@@ -171,13 +171,41 @@ export default function RoomPage() {
     };
   }, [showNamePrompt]);
 
-  // Admin periodically re-broadcasts the roster so clients that missed a JOIN catch up
+  // Admin: re-broadcast roster + reconcile against PubNub's real subscriber list.
+  // hereNow() returns everyone actually subscribed to the channel; any player in
+  // our state whose id isn't in that list is a ghost (closed tab, dead network)
+  // and gets evicted. Covers the case where a client never got to publish LEAVE.
   useEffect(() => {
     if (!isAdmin) return;
-    const id = setInterval(() => {
+    const reconcile = async () => {
       const s = sRef.current;
+      try {
+        const res = await pnRef.current?.hereNow({ channels: [channel] });
+        const occupants = res?.channels?.[channel]?.occupants || [];
+        const live = new Set(occupants.map(o => o.uuid));
+        if (live.size > 0) {
+          let changed = false;
+          for (const id of Object.keys(s.players)) {
+            if (id !== MY_ID && !live.has(id)) {
+              delete s.players[id];
+              s.hasVoted.delete(id);
+              delete s.pending[id];
+              if (s.revealed) delete s.votes[id];
+              changed = true;
+            }
+          }
+          if (changed) {
+            pub({ type: 'ROSTER_SYNC', players: { ...s.players } });
+            // Also publish an explicit LEAVE for each evicted ghost so other
+            // clients that missed the roster broadcast still drop them
+            sync();
+          }
+        }
+      } catch {}
       pub({ type: 'ROSTER_SYNC', players: { ...s.players } });
-    }, 15000);
+    };
+    reconcile();
+    const id = setInterval(reconcile, 15000);
     return () => clearInterval(id);
   }, [isAdmin]);
 

@@ -24,5 +24,11 @@ export function getChannel(roomCode) {
 }
 
 export function createPubNub(userId) {
-  return new PubNub({ publishKey: 'demo', subscribeKey: 'demo', userId });
+  // Shorter heartbeat so ghost sessions (closed tabs, dropped network) time
+  // out in ~60s instead of PubNub's 300s default
+  return new PubNub({
+    publishKey: 'demo', subscribeKey: 'demo', userId,
+    heartbeatInterval: 20,
+    presenceTimeout: 60,
+  });
 }
